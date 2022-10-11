@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+
+  postgres:
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      DB_PASS: "${DB_PASS}"
+      DB_USER: "ztf_admin"
+      DB_API: "ztf_api"
+      DB_CORE: "ztf_core"
+    ports:
+      - "5432:5432"
