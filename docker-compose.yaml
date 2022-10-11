@@ -13,3 +13,11 @@ services:
       - "5432:5432"
     env_file:
       - .env
+  pgadmin:
+    container_name: pgadmin4_container
+    image: dpage/pgadmin4
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "5050:80"
