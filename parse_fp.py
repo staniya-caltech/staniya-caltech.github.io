@@ -1,5 +1,6 @@
 import csv
 import os
+import pandas as pd
 
 
 class DataRetrieval:
@@ -22,6 +23,28 @@ class DataRetrieval:
         else:
             print("The file you inputted was not valid. Please input a filepath for a file that was generated through one of the three approved forced photometry pipelines. ")
 
+    def process_phot(self):
+        """
+        Function to parse contents of phot file and write it as a csv
+        """
+        assert (os.path.splitext(self.filepath)[-1].lower() == ".phot")
+        header = ["PS1_ID", "MJD", "Mag_ZTF", "Mag_err", "Flux", "Flux_err", "g_PS1", "r_PS1", "i_PS1", "Stargal", "infobits"]
+        output_csv = os.path.dirname(
+            self.filepath) + "/" + self.filename.split(".", 1)[0] + ".csv"
+
+        # read the contents of .phot file as a list of strings, then create a csv by replacing the whitespaces of each string with commas
+        with open(self.filepath, "r") as in_file:
+            mod_file = list(in_file)
+            for i, line in enumerate(mod_file):
+                mod_file[i] = line.replace(" ", ",")
+            lines = (line.split(",") for line in mod_file)
+            output_csv = os.path.dirname(
+            self.filepath) + "/" + self.filename.split(".", 1)[0] + ".csv"
+            with open(output_csv, "w", newline='') as outcsv:
+                writer = csv.writer(outcsv)
+                writer.writerow(header)
+                writer.writerows(lines)
+
     def process_dat(self):
         """
         Function to parse contents of dat file and write it as a csv
@@ -43,16 +66,4 @@ class DataRetrieval:
             # write ztffps parameters as a header into a new CSV file
             writer = csv.writer(outcsv)
             # write .dat file contents
-            writer.writerows(row + [0.0] for row in datContent)
-
-
-def main():
-    # Testing dataretrieval class
-    data = DataRetrieval(
-        "/Users/staniya/Documents/Schmidt Academy/ZTF/lightcurves/ztffps/ztffps_192331646755804879_0842_38.dat")
-    if data.pipeline == "z":
-        data.process_dat()
-
-
-if __name__ == "__main__":
-    main()
+            writer.writerows(row for row in datContent)
