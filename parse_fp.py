@@ -27,7 +27,8 @@ class DataRetrieval:
         Function to parse contents of phot file and write it as a csv
         """
         assert (os.path.splitext(self.filepath)[-1].lower() == ".phot")
-        header = ["PS1_ID", "MJD", "Mag_ZTF", "Mag_err", "Flux", "Flux_err", "g_PS1", "r_PS1", "i_PS1", "Stargal", "infobits"]
+        header = ["PS1_ID", "MJD", "Mag_ZTF", "Mag_err", "Flux",
+            "Flux_err", "g_PS1", "r_PS1", "i_PS1", "Stargal", "infobits"]
 
         # read the contents of .phot file as a list of strings, then create a csv by replacing the whitespaces of each string with commas
         with open(self.filepath, "r") as in_file:
@@ -52,15 +53,3 @@ class DataRetrieval:
         header_row = [param.replace(',', '') for param in datContent[0]]
         datContent = datContent[1:]
         return pd.DataFrame(datContent, columns=header_row)
-
-# def main():
-#     # Testing dataretrieval class
-#     data = DataRetrieval(
-#         "/Users/staniya/Documents/Schmidt Academy/ZTF/lightcurves/Andrew/ps1_sources_0842_38_zr_sciimg.phot")
-#     if data.pipeline == "a":
-#         print(data.process_phot())
-#     else:
-#         print(data.process_dat())
-        
-# if __name__ == "__main__":
-#     main()
