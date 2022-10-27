@@ -5,8 +5,6 @@ import os
 from parse_fp import DataRetrieval
 from sqlalchemy import create_engine
 import logging
-from functools import partial
-
 from dotenv import find_dotenv, dotenv_values
 
 
@@ -50,7 +48,7 @@ class DataIngestion:
                               'forcediffimflux', 'forcediffimfluxunc', 'clrcoeff', 'clrcoeffunc', 'infobitssci'])
         return self.dataframe
 
-    def populate_args_from_dotenv(self, func):
+    def populate_args_from_dotenv(self):
         """
         Function to read secret environment variables from .env file
         """
@@ -59,12 +57,10 @@ class DataIngestion:
             dotenv_path = find_dotenv(raise_error_if_not_found=True)
             logger.info('Found .evn, loading variables')
             env_dict = dotenv_values(dotenv_path=dotenv_path)
-            par_func = partial(func, **env_dict)
-            par_func.__doc__ = func.__doc__
-            return par_func
+            return env_dict
         except IOError:
             logger.info('Didn\'t find .env')
-            return func 
+            return None
 
     def establish_sql_conn(self):
         """
@@ -79,8 +75,15 @@ class DataIngestion:
         else:
             raise Exception(
                 "The input is not a product of a valid photometry pipeline")
-        self.populate_args_from_dotenv()    
-
+        env_dict = self.populate_args_from_dotenv()
+        if env_dict != None:
+            user = env_dict['POSTGRES_USER']
+            password = env_dict['POSTGRES_PASSWORD']
+            host = 'localhost'
+            port = 5432
+            database = 'postgres'
+            engine = create_engine(f'postgresql://{user}:{password}@:{host}:{port}/{database}')
+            self.dataframe.to_sql('stars', engine, if_exists='replace')
 
 def main():
     return
