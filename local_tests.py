@@ -15,6 +15,11 @@ def test_data_retrieval(data_list):
             print(other_dataframe.head())
             print(other_dataframe.isnull().sum())
 
+def test_data_ingestion(data_list):
+    for data in data_list:
+        data = DataIngestion(data)
+        data.process_pandas_to_sql()
+
 
 def main():
     # Testing dataretrieval class
@@ -23,7 +28,11 @@ def main():
         "/Users/staniya/Documents/Schmidt Academy/ZTF/Data/lightcurves/mrozpipe/mrozpipe_156790468415434435_0699_38.dat",
         "/Users/staniya/Documents/Schmidt Academy/ZTF/Data/lightcurves/ztffps/ztffps_156800463984462670_0699_38.dat"
     ]
-    test_data_retrieval(data_list)
+    # test_data_retrieval(data_list)
+
+    # Testing dataingestion class
+    test_data_ingestion(data_list)
+
 
 if __name__ == "__main__":
     main()
