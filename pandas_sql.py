@@ -1,12 +1,10 @@
-import numpy as np
+from collections import OrderedDict
 import pandas as pd
-import plotly.express as px
-import os
 from parse_fp import DataRetrieval
-from sqlalchemy import create_engine
 import logging
+import psycopg2
 from dotenv import find_dotenv, dotenv_values
-
+from sqlalchemy import create_engine 
 
 class DataIngestion:
     """ Data ingestion class extracts data from Pandas dataframes and imports it to a SQL for immediate use"""
@@ -23,7 +21,7 @@ class DataIngestion:
             self.dataframe = dr.process_phot()
         else:
             self.dataframe = dr.process_dat()
-        assert (type(self.dataframe == pd.core.frame.DataFrame))
+        assert (type(self.dataframe) == pd.core.frame.DataFrame)
 
     def clean_df_andrew(self):
         """"
@@ -62,7 +60,7 @@ class DataIngestion:
             logger.info('Didn\'t find .env')
             return None
 
-    def establish_sql_conn(self):
+    def process_pandas_to_sql(self):
         """
         Function to convert Pandas DataFrame to Postgres DB by authenticating using information in .env and using Pandas.sql method
         """
@@ -76,18 +74,14 @@ class DataIngestion:
             raise Exception(
                 "The input is not a product of a valid photometry pipeline")
         env_dict = self.populate_args_from_dotenv()
+        assert(type(env_dict) == OrderedDict)
         if env_dict != None:
             user = env_dict['POSTGRES_USER']
             password = env_dict['POSTGRES_PASSWORD']
-            host = 'localhost'
-            port = 5432
-            database = 'postgres'
-            engine = create_engine(f'postgresql://{user}:{password}@:{host}:{port}/{database}')
-            self.dataframe.to_sql('stars', engine, if_exists='replace')
+            print(user, password)
 
-def main():
-    return
-
-
-if __name__ == "__main__":
-    main()
+            # connect to postgresql using psycopg2 
+            conn_string = f"host='db' dbname='postgres' user={user} password={password}"
+            engine = psycopg2.connect(conn_string)
+            # if data already exists in the table, append to the existing data
+            self.dataframe.to_sql('your_table_name', engine, if_exists='append')

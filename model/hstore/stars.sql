@@ -14,7 +14,7 @@ CREATE TABLE stars (
 
 ALTER TABLE stars OWNER TO ztfpo;
 
-ALTER TABLE pipeline.stars SET SCHEMA transients;
+ALTER TABLE IF NOT EXISTS pipeline.stars SET SCHEMA transients;
 
 
 SET default_tablespace = stars_indx_04;
