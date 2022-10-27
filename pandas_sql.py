@@ -21,9 +21,10 @@ class DataIngestion:
             self.dataframe=dr.process_dat()
         assert(type(self.dataframe == pd.core.frame.DataFrame))
     
-    def data_processing(self):
+    def data_processing_andrew(self):
         """ Process the dataframe such that it contains appropriate data"""
-        self.dataframe.dropna(subset=[''])
+        self.dataframe.dropna()
+        
 
 def main():
     return
