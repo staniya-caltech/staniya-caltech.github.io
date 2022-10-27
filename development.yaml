@@ -7,10 +7,10 @@ services:
     environment:
       POSTGRES_USER: "${POSTGRES_USER}"
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
-      DB_PASS: "${DB_PASS}"
-      DB_USER: "${DB_USER}"
-      DB_API: "${DB_API}"
-      DB_CORE: "${DB_CORE}"
+      # DB_PASS: "${DB_PASS}"
+      # DB_USER: "${DB_USER}"
+      # DB_API: "${DB_API}"
+      # DB_CORE: "${DB_CORE}"
     expose:
       - "5433:5433"
     volumes:

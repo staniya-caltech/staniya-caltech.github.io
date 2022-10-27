@@ -11,8 +11,18 @@ services:
     restart: always
     ports:
       - "5433:5433"
+    expose:
+      - "5433:5433"
     env_file:
       - .env
+  adminer:
+    image: adminer
+    restart: always
+    depends_on:
+      - postgres
+    ports:
+      - 8080:8080
+    
   pgadmin:
     container_name: pgadmin4_container
     image: dpage/pgadmin4
