@@ -19,9 +19,9 @@ def test_data_retrieval(data_list):
 def main():
     # Testing dataretrieval class
     data_list = [
-        "/Users/staniya/Documents/Schmidt Academy/ZTF/lightcurves/Andrew/ps1_sources_0842_38_zr_sciimg.phot",
-        "/Users/staniya/Documents/Schmidt Academy/ZTF/lightcurves/mrozpipe/mrozpipe_156790468415434435_0699_38.dat",
-        "/Users/staniya/Documents/Schmidt Academy/ZTF/lightcurves/ztffps/ztffps_156800463984462670_0699_38.dat"
+        "/Users/staniya/Documents/Schmidt Academy/ZTF/Data/lightcurves/Andrew/ps1_sources_0842_38_zr_sciimg.phot",
+        "/Users/staniya/Documents/Schmidt Academy/ZTF/Data/lightcurves/mrozpipe/mrozpipe_156790468415434435_0699_38.dat",
+        "/Users/staniya/Documents/Schmidt Academy/ZTF/Data/lightcurves/ztffps/ztffps_156800463984462670_0699_38.dat"
     ]
     test_data_retrieval(data_list)
 
