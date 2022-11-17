@@ -2,7 +2,7 @@ FROM postgres:15.0
 
 FROM python:3.11
 ENV CQLENG_ALLOW_SCHEMA_MANAGEMENT="True"
-RUN pip install psycopg2-binary
+RUN pip install psycopg2-binar
 
 # Set the timezone
 ENV TZ=America/Los_Angeles

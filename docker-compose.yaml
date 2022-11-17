@@ -1,8 +1,19 @@
 version: '3'
 
 services:
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/usr/src/app/
+    ports:
+      - 8000:8000
+    env_file:
+      - ./.env.dev
+    depends_on:
+      - ztfdb
 
-  postgres:
+  ztfdb:
     image: postgres:15.0
     restart: always
     environment:
@@ -20,14 +31,6 @@ services:
       - "5438:5432"
     volumes:
       - ./data:/var/lib/postgresql/data
-      - ./sql/stars.sql:/docker-entrypoint-initdb.d/stars.sql
-  adminer:
-    image: adminer
-    restart: always
-    depends_on:
-      - postgres
-    ports:
-      - 8080:8080
     
   pgadmin:
     container_name: pgadmin4_container
