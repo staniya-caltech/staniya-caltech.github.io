@@ -76,12 +76,13 @@ class DataIngestion:
         env_dict = self.populate_args_from_dotenv()
         assert(type(env_dict) == OrderedDict)
         if env_dict != None:
+            database = 'postgres'
             user = env_dict['POSTGRES_USER']
             password = env_dict['POSTGRES_PASSWORD']
-            print(user, password)
+            
 
             # connect to postgresql using psycopg2 
-            conn_string = f"host='db' dbname='postgres' user={user} password={password}"
+            conn_string = f"host=localhost dbname='postgres' user={user} password={password}"
             engine = psycopg2.connect(conn_string)
             # if data already exists in the table, append to the existing data
-            self.dataframe.to_sql('your_table_name', engine, if_exists='append')
+            self.dataframe.to_sql('postgres', engine, if_exists='append')
