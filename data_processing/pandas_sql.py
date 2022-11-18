@@ -76,10 +76,10 @@ class DataIngestion:
         env_dict = self.populate_args_from_dotenv()
         assert(type(env_dict) == OrderedDict)
         if env_dict != None:
-            host= "localhost"
+            host= "ztfdb"
             database = "postgres"
-            user = str(env_dict['POSTGRES_USER'])
-            password = str(env_dict['POSTGRES_PASSWORD'])
+            user = env_dict['POSTGRES_USER']
+            password = env_dict['POSTGRES_PASSWORD']
             port = 5432
 
             # connect to postgresql using psycopg2 

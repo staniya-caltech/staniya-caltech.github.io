@@ -26,5 +26,7 @@ pyenv
 .idea
 *.iml
 
-.env
+.env*
 data
+
+Pipfile*

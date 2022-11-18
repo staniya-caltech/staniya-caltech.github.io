@@ -10,7 +10,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
+from collections import OrderedDict
+from dotenv import find_dotenv, dotenv_values
 from pathlib import Path
+import logging
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,12 +23,27 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-p6$6z+8_pifx44!21j_g32d^kl)@2f_1ok^t9us4r6s-k(cq@i'
+SECRET_KEY = 'django-insecure-dfyx@=+qm5y_mz3g-d)(8z584o=#3@loq*%+aaw=abh$pt8evu'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
+
+
+def populate_args_from_dotenv():
+    """
+    Function to read secret environment variables from .env file
+    """
+    logger = logging.getLogger(__name__)
+    try:
+        dotenv_path = find_dotenv(raise_error_if_not_found=True)
+        logger.info('Found .evn, loading variables')
+        env_dict = dotenv_values(dotenv_path=dotenv_path)
+        return env_dict
+    except IOError:
+        logger.info('Didn\'t find .env')
+        return None
 
 
 # Application definition
@@ -38,7 +56,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # configured application
+    # my application
     'ztfdata',
 ]
 
@@ -75,11 +93,21 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-
+env_dict = populate_args_from_dotenv()
+assert(type(env_dict) == OrderedDict)
+if env_dict != None:
+        host= "ztfdb"
+        database = "postgres"
+        user = env_dict['POSTGRES_USER']
+        password = env_dict['POSTGRES_PASSWORD']
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'postgres',
+        'USER': user,
+        'PASSWORD' : password,
+        'HOST': host,
+        'PORT': 5432
     }
 }
 
