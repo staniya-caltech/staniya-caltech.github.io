@@ -5,8 +5,8 @@ from django.db import models
 from django.conf import settings
 
 import pandas as pd
-from data_processing/parse_fp import DataRetrieval
-
+from sqlalchemy import create_engine 
+from data_processing.parse_fp import DataRetrieval
 
 
 class PandasData(models.Model):
@@ -49,20 +49,6 @@ class PandasData(models.Model):
                               'forcediffimflux', 'forcediffimfluxunc', 'clrcoeff', 'clrcoeffunc', 'infobitssci'])
         return self.dataframe
 
-    def populate_args_from_dotenv(self):
-        """
-        Function to read secret environment variables from .env file
-        """
-        logger = logging.getLogger(__name__)
-        try:
-            dotenv_path = find_dotenv(raise_error_if_not_found=True)
-            logger.info('Found .evn, loading variables')
-            env_dict = dotenv_values(dotenv_path=dotenv_path)
-            return env_dict
-        except IOError:
-            logger.info('Didn\'t find .env')
-            return None
-
     def process_pandas_to_sql(self):
         """
         Function to convert Pandas DataFrame to Postgres DB by authenticating using information in .env and using Pandas.sql method
@@ -83,3 +69,7 @@ class PandasData(models.Model):
         database_name = settings.DATABASES['default']['NAME']
         host = settings.DATABASES['default']['HOST']
         port = settings.DATABASES['default']['PORT']
+
+        conn_string = f'postgresql://{user}:{password}@{host}:{port}/{database_name}'
+        engine = create_engine(conn_string, echo=False)
+        self.dataframe.to_sql('stars', engine,if_exists='append',index=True)

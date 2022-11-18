@@ -100,6 +100,8 @@ if env_dict != None:
         database = "postgres"
         user = env_dict['POSTGRES_USER']
         password = env_dict['POSTGRES_PASSWORD']
+else:
+    raise Exception(f"Error: Make sure that .env file is populated with postgresql parameters")
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
