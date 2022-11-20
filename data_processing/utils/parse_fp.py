@@ -1,5 +1,6 @@
-import os
+import os, sys
 import pandas as pd
+from stat import *
 
 
 class DataRetrieval:
@@ -8,10 +9,11 @@ class DataRetrieval:
         """ Create a new instance of DataRetrieval """
         return super().__new__(cls)
 
-    def __init__(self, filepath):
+    def __init__(self, rel_filepath):
         """ Run data_extraction function depending on filename"""
+        self.rel_filepath = rel_filepath
         self.filepath = filepath
-        assert (os.path.exists(self.filepath))
+        assert (S_ISREG(os.stat(str(self.filepath)).st_mode))
         self.filename = os.path.basename(filepath)
         self.returnlist = []
         if "ps1" in self.filename:

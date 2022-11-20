@@ -1,75 +1,87 @@
-from django.db import models
-
-# Create your models here.
+### data/models.py ###
+from uuid import uuid4
 from django.db import models
 from django.conf import settings
-
-import pandas as pd
-from sqlalchemy import create_engine 
-from data_processing.parse_fp import DataRetrieval
+# Create your models here.
 
 
 class PandasData(models.Model):
-    """ Data ingestion class extracts data from Pandas dataframes and imports it to a SQL for immediate use"""
-    def __new__(cls, *args, **kwargs):
-        """ Create a new instance of DataIngestion """
-        return super().__new__(cls)
+    index = models.IntegerField(primary_key=True)
+    field = models.IntegerField()
+    ccdid = models.IntegerField()
+    qid = models.IntegerField()
+    filter = models.CharField(max_length=5, null=True, blank=True)
+    pid = models.IntegerField()
+    infobitssci = models.IntegerField()
+    sciinpseeing = models.DecimalField(
+        max_digits=100,   decimal_places=15, null=True, blank=True)
+    scibckgnd = models.DecimalField(
+        max_digits=100,   decimal_places=15, null=True, blank=True)
+    scisigpix = models.DecimalField(
+        max_digits=100,   decimal_places=15, null=True, blank=True)
+    zpmaginpsci = models.DecimalField(
+        max_digits=100,   decimal_places=15, null=True, blank=True)
+    zpmaginpsciunc = models.DecimalField(
+        max_digits=100,   decimal_places=15, null=True, blank=True)
+    zpmaginpscirms = models.DecimalField(
+        max_digits=100,   decimal_places=15, null=True, blank=True)
+    clrcoeff = models.DecimalField(
+        max_digits=100,   decimal_places=15, null=True, blank=True)
+    clrcoeffunc = models.DecimalField(
+        max_digits=100,   decimal_places=15, null=True, blank=True)
+    ncalmatches = models.IntegerField()
+    exptime = models.DecimalField(
+        max_digits=100, decimal_places=15, null=True, blank=True)
+    adpctdif1 =  models.DecimalField(
+        max_digits=100, decimal_places=15, null=True, blank=True)
+    adpctdif2 = models.DecimalField(
+        max_digits=100, decimal_places=15, null=True, blank=True)
+    diffmaglim = models.DecimalField(
+        max_digits=100, decimal_places=15, null=True, blank=True)
+    zpdiff = models.DecimalField(
+        max_digits=100, decimal_places=15, null=True, blank=True)
+    programid = models.IntegerField()
+    jd = models.DecimalField(
+        max_digits=100, decimal_places=15, null=True, blank=True)
+    rfid = models.DecimalField(
+        max_digits=100, decimal_places=15, null=True, blank=True)
+    forcediffimflux = models.DecimalField(
+        max_digits=100, decimal_places=15, null=True, blank=True)
+    forcediffimfluxunc = models.DecimalField(
+        max_digits=100, decimal_places=15, null=True, blank=True)
+    forcediffimsnr = models.DecimalField(
+        max_digits=100, decimal_places=15, null=True, blank=True)
+    forcediffimchisq = models.DecimalField(
+        max_digits=100, decimal_places=15, null=True, blank=True)
+    forcediffimfluxap = models.DecimalField(
+        max_digits=100, decimal_places=15, null=True, blank=True)
+    forcediffimfluxuncap = models.DecimalField(
+        max_digits=100, decimal_places=15, null=True, blank=True)
+    forcediffimsnrap = models.DecimalField(
+        max_digits=100, decimal_places=15, null=True, blank=True)
+    aperturecorr = models.DecimalField(
+        max_digits=100, decimal_places=15, null=True, blank=True)
+    dnearestrefsrc = models.DecimalField(
+        max_digits=100, decimal_places=15, null=True, blank=True)
+    nearestrefmag = models.DecimalField(
+        max_digits=100, decimal_places=15, null=True, blank=True)
+    nearestrefmagunc = models.DecimalField(
+        max_digits=100, decimal_places=15, null=True, blank=True)
+    nearestrefmagunc = models.DecimalField(
+        max_digits=100, decimal_places=15, null=True, blank=True)
+    nearestrefchi = models.DecimalField(
+        max_digits=100, decimal_places=15, null=True, blank=True)
+    nearestrefsharp = models.DecimalField(
+        max_digits=100, decimal_places=15, null=True, blank=True)
+    refjdstart = models.DecimalField(
+        max_digits=100, decimal_places=15, null=True, blank=True)
+    refjdend = models.DecimalField(
+        max_digits=100, decimal_places=15, null=True, blank=True)
+    procstatus = models.IntegerField()
 
-    def __init__(self, filepath):
-        """ Parametrized constructor for DataIngestion Class """
-        # Initialize a DataRetrieval object using the filepath as a parameter
-        dr = DataRetrieval(filepath)
-        self.pipeline = dr.pipeline
-        if self.pipeline == "a":
-            self.dataframe = dr.process_phot()
-        else:
-            self.dataframe = dr.process_dat()
-        assert (type(self.dataframe) == pd.core.frame.DataFrame)
+    def __str__(self):
+        return self.index
 
-    def clean_df_andrew(self):
-        """"
-        A function to prepare the dataframe for Andrew before converting to PostgresDB 
-        """
-        self.dataframe.dropna()
-        return self.dataframe
 
-    def clean_df_mroz(self):
-        """"
-        A function to prepare the dataframe for Mrozpipe before converting to PostgresDB 
-        """
-        self.dataframe.dropna(subset=['pid', 'bjd', 'mag', 'magerr', 'diffimflux',
-                              'diffimfluxunc', 'clrcoeff', 'clrcoeffunc', 'infobits'])
-        return self.dataframe
-
-    def clean_df_ztffps(self):
-        """"
-        A function to prepare the dataframe for ztffps before converting to PostgresDB 
-        """
-        self.dataframe.dropna(subset=['pid', 'jd', 'nearestrefmag', 'nearestrefmagunc',
-                              'forcediffimflux', 'forcediffimfluxunc', 'clrcoeff', 'clrcoeffunc', 'infobitssci'])
-        return self.dataframe
-
-    def process_pandas_to_sql(self):
-        """
-        Function to convert Pandas DataFrame to Postgres DB by authenticating using information in .env and using Pandas.sql method
-        """
-        if self.pipeline == "a":
-            self.clean_df_andrew()
-        elif self.pipeline == "m":
-            self.clean_df_mroz()
-        elif self.pipeline == "z":
-            self.clean_df_ztffps()
-        else:
-            raise Exception(
-                "The input is not a product of a valid photometry pipeline")
-
-        # establish connection to PostgreSQL by reading fields from Django settings
-        user = settings.DATABASES['default']['USER']
-        password = settings.DATABASES['default']['PASSWORD']
-        database_name = settings.DATABASES['default']['NAME']
-        host = settings.DATABASES['default']['HOST']
-        port = settings.DATABASES['default']['PORT']
-
-        conn_string = f'postgresql://{user}:{password}@{host}:{port}/{database_name}'
-        engine = create_engine(conn_string, echo=False)
-        self.dataframe.to_sql('stars', engine,if_exists='append',index=True)
+    class Meta:
+        ordering = ['index']
