@@ -1,7 +1,5 @@
 from .parse_fp import DataRetrieval
 # Create your views here.
-from django.db import models
-
 # Create your models here.
 from django.db import models
 from django.conf import settings
@@ -9,17 +7,18 @@ from django.conf import settings
 import pandas as pd
 from sqlalchemy import create_engine
 
-class DataIngestion(models.Model):
+class DataIngestion():
     """ Data ingestion class extracts data from Pandas dataframes and imports it to a SQL for immediate use"""
     def __new__(cls, *args, **kwargs):
         """ Create a new instance of DataIngestion """
         return super().__new__(cls)
 
-    def __init__(self, rel_filepath):
+    def __init__(self, rel_filepath, pipeline):
         """ Parametrized constructor for DataIngestion Class """
         # Initialize a DataRetrieval object using the filepath as a parameter
-        dr = DataRetrieval(rel_filepath)
-        self.pipeline = dr.pipeline
+        self.pipeline = pipeline
+        self.rel_filepath = rel_filepath
+        dr = DataRetrieval(self.rel_filepath, self.pipeline)
         if self.pipeline == "a":
             self.dataframe = dr.process_phot()
         else:

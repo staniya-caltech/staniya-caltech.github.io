@@ -7,6 +7,8 @@ from django.contrib import messages
 from data_processing.utils.pandas_sql import DataIngestion
 
 from .models import PandasData
+from django.core.files.storage import FileSystemStorage
+import os
 # Create your views here.
 
 
@@ -24,10 +26,32 @@ def UploadView(request):
     if request.method == "GET":
         return render(request, template_name, prompt)
     elif request.method == 'POST':
-        dat_file = request.FILES['file']
-        if not dat_file.name.endswith('.dat'):
-            messages.error(request, 'THIS IS NOT A DAT FILE')
-        cleaned_data = DataIngestion(dat_file)
+        rel_filepath = request.FILES['file']
+        if not rel_filepath.name.endswith('.dat') or not rel_filepath.name.endswith('.phot'):
+            messages.error(request, 'THIS IS NOT A DAT OR PHOT FILE')
+        base_dir = os.path.join(os.getcwd(), 'uploaded_data')
+        if not os.path.exists(base_dir):
+            os.makedirs(base_dir)
+        if "ps1" in rel_filepath.name:
+            fs = FileSystemStorage(location=os.path.join(base_dir, 'Andrew'))
+            filename = fs.save(rel_filepath.name, rel_filepath)
+            uploaded_file_path = fs.path(filename)
+            pipeline = "a"
+        elif "mrozpipe" in rel_filepath.name:
+            fs = FileSystemStorage(location=os.path.join(base_dir, 'mrozpipe'))
+            filename = fs.save(rel_filepath.name, rel_filepath)
+            uploaded_file_path = fs.path(filename)
+            pipeline = "m"
+        elif "ztffps" in rel_filepath.name:
+            fs = FileSystemStorage(location=os.path.join(base_dir, 'ztffps'))
+            filename = fs.save(rel_filepath.name, rel_filepath)
+            uploaded_file_path = fs.path(filename)
+            pipeline = "z"
+        else:
+            raise Exception(
+                "The input is not a product of a valid photometry pipeline")
+        
+        cleaned_data = DataIngestion(uploaded_file_path, pipeline)
         df = cleaned_data.process_pandas_to_sql()
         for model in df.itertuples():
             _, created = PandasData.objects.update_or_create(

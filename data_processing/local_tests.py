@@ -34,7 +34,7 @@ def main():
     # test_data_retrieval(data_list)
 
     # Testing dataingestion class
-    # test_data_ingestion(data_list)
+    test_data_ingestion(data_list)
 
 
 if __name__ == "__main__":
