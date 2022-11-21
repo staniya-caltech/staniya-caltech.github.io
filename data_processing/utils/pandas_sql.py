@@ -1,29 +1,29 @@
-import numpy as np
+from .parse_fp import DataRetrieval
+# Create your views here.
+# Create your models here.
+from django.db import models
+from django.conf import settings
+
 import pandas as pd
-import plotly.express as px
-import os
-from parse_fp import DataRetrieval
 from sqlalchemy import create_engine
-import logging
-from dotenv import find_dotenv, dotenv_values
 
-
-class DataIngestion:
+class DataIngestion():
     """ Data ingestion class extracts data from Pandas dataframes and imports it to a SQL for immediate use"""
     def __new__(cls, *args, **kwargs):
         """ Create a new instance of DataIngestion """
         return super().__new__(cls)
 
-    def __init__(self, filepath):
+    def __init__(self, rel_filepath, pipeline):
         """ Parametrized constructor for DataIngestion Class """
         # Initialize a DataRetrieval object using the filepath as a parameter
-        dr = DataRetrieval(filepath)
-        self.pipeline = dr.pipeline
+        self.pipeline = pipeline
+        self.rel_filepath = rel_filepath
+        dr = DataRetrieval(self.rel_filepath, self.pipeline)
         if self.pipeline == "a":
             self.dataframe = dr.process_phot()
         else:
             self.dataframe = dr.process_dat()
-        assert (type(self.dataframe == pd.core.frame.DataFrame))
+        assert (type(self.dataframe) == pd.core.frame.DataFrame)
 
     def clean_df_andrew(self):
         """"
@@ -48,21 +48,7 @@ class DataIngestion:
                               'forcediffimflux', 'forcediffimfluxunc', 'clrcoeff', 'clrcoeffunc', 'infobitssci'])
         return self.dataframe
 
-    def populate_args_from_dotenv(self):
-        """
-        Function to read secret environment variables from .env file
-        """
-        logger = logging.getLogger(__name__)
-        try:
-            dotenv_path = find_dotenv(raise_error_if_not_found=True)
-            logger.info('Found .evn, loading variables')
-            env_dict = dotenv_values(dotenv_path=dotenv_path)
-            return env_dict
-        except IOError:
-            logger.info('Didn\'t find .env')
-            return None
-
-    def establish_sql_conn(self):
+    def process_pandas_to_sql(self):
         """
         Function to convert Pandas DataFrame to Postgres DB by authenticating using information in .env and using Pandas.sql method
         """
@@ -75,19 +61,15 @@ class DataIngestion:
         else:
             raise Exception(
                 "The input is not a product of a valid photometry pipeline")
-        env_dict = self.populate_args_from_dotenv()
-        if env_dict != None:
-            user = env_dict['POSTGRES_USER']
-            password = env_dict['POSTGRES_PASSWORD']
-            host = 'localhost'
-            port = 5432
-            database = 'postgres'
-            engine = create_engine(f'postgresql://{user}:{password}@:{host}:{port}/{database}')
-            self.dataframe.to_sql('stars', engine, if_exists='replace')
 
-def main():
-    return
+        # # establish connection to PostgreSQL by reading fields from Django settings
+        # user = settings.DATABASES['default']['USER']
+        # password = settings.DATABASES['default']['PASSWORD']
+        # database_name = settings.DATABASES['default']['NAME']
+        # host = settings.DATABASES['default']['HOST']
+        # port = settings.DATABASES['default']['PORT']
 
-
-if __name__ == "__main__":
-    main()
+        # conn_string = f'postgresql://{user}:{password}@{host}:{port}/{database_name}'
+        # engine = create_engine(conn_string, echo=False)
+        # self.dataframe.to_sql('stars', engine,if_exists='append',index=True)
+        return self.dataframe
