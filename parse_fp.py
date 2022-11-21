@@ -13,6 +13,7 @@ class DataRetrieval:
         self.filepath = filepath
         assert (os.path.exists(self.filepath))
         self.filename = os.path.basename(filepath)
+        self.returnlist = []
         if "ps1" in self.filename:
             self.pipeline = "a"
         elif "mrozpipe" in self.filename:
@@ -20,7 +21,8 @@ class DataRetrieval:
         elif "ztffps" in self.filename:
             self.pipeline = "z"
         else:
-            print("The file you inputted was not valid. Please input a filepath for a file that was generated through one of the three approved forced photometry pipelines. ")
+            raise Exception(
+                "The input is not a product of a valid photometry pipeline")
 
     def process_phot(self):
         """
@@ -28,7 +30,7 @@ class DataRetrieval:
         """
         assert (os.path.splitext(self.filepath)[-1].lower() == ".phot")
         header = ["PS1_ID", "MJD", "Mag_ZTF", "Mag_err", "Flux",
-            "Flux_err", "g_PS1", "r_PS1", "i_PS1", "Stargal", "infobits"]
+                  "Flux_err", "g_PS1", "r_PS1", "i_PS1", "Stargal", "infobits"]
 
         # read the contents of .phot file as a list of strings, then create a csv by replacing the whitespaces of each string with commas
         with open(self.filepath, "r") as in_file:
