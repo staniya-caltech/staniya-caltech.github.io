@@ -1,7 +1,6 @@
 import os, sys
 import pandas as pd
 from stat import *
-from django.contrib import messages
 
 class DataRetrieval:
     """ Data retrieval class extracts data from different forced photometry pipelines"""

@@ -11,7 +11,7 @@ class PandasData(models.Model):
     ccdid = models.IntegerField()
     qid = models.IntegerField()
     filter = models.CharField(max_length=5, null=True, blank=True)
-    pid = models.IntegerField()
+    pid = models.BigIntegerField()
     infobitssci = models.IntegerField()
     sciinpseeing = models.DecimalField(
         max_digits=100,   decimal_places=15, null=True, blank=True)

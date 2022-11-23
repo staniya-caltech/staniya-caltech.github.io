@@ -1,13 +1,16 @@
+from ztfdata.models import PandasData
 from .parse_fp import DataRetrieval
 # Create your views here.
 # Create your models here.
 from django.db import models
 from django.conf import settings
+from django.core.management.base import BaseCommand
 
 import pandas as pd
+import psycopg2
 from sqlalchemy import create_engine
 
-class DataIngestion():
+class DataIngestion(BaseCommand):
     """ Data ingestion class extracts data from Pandas dataframes and imports it to a SQL for immediate use"""
     def __new__(cls, *args, **kwargs):
         """ Create a new instance of DataIngestion """
@@ -61,15 +64,13 @@ class DataIngestion():
         else:
             raise Exception(
                 "The input is not a product of a valid photometry pipeline")
-
-        # # establish connection to PostgreSQL by reading fields from Django settings
-        # user = settings.DATABASES['default']['USER']
-        # password = settings.DATABASES['default']['PASSWORD']
-        # database_name = settings.DATABASES['default']['NAME']
-        # host = settings.DATABASES['default']['HOST']
-        # port = settings.DATABASES['default']['PORT']
-
-        # conn_string = f'postgresql://{user}:{password}@{host}:{port}/{database_name}'
-        # engine = create_engine(conn_string, echo=False)
-        # self.dataframe.to_sql('stars', engine,if_exists='append',index=True)
+        # establish connection to PostgreSQL by reading fields from Django settings
+        user = settings.DATABASES['default']['USER']
+        password = settings.DATABASES['default']['PASSWORD']
+        database_name = settings.DATABASES['default']['NAME']
+        host = settings.DATABASES['default']['HOST']
+        port = settings.DATABASES['default']['PORT']
+        conn_string = f'postgresql://{user}:{password}@{host}:{port}/{database_name}'
+        engine = create_engine(conn_string, echo=False)
+        self.dataframe.to_sql(PandasData._meta.db_table, con=engine, if_exists='append', index=False)
         return self.dataframe

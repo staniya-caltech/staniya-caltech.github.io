@@ -1,4 +1,3 @@
-from utils.pandas_sql import DataIngestion
 
 # Local Test for DataRetrieval
 # def test_data_retrieval(data_list):
@@ -15,6 +14,9 @@ from utils.pandas_sql import DataIngestion
 #             print(other_dataframe.head())
 #             print(other_dataframe.isnull().sum())
 #             print(other_dataframe.dtypes)
+
+from pandas_sql import DataIngestion
+
 
 def test_data_ingestion(data_list):
     for data in data_list:
