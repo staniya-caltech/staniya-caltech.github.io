@@ -135,6 +135,5 @@ def UploadView(request):
         #                   'refjdstart': model.refjdstart,
         #                   'refjdend': model.refjdend,
         #                   'procstatus': model.procstatus})
-        # context = {}
-        # render(request, template_name, context)
-        return messages.success(request, f'SUCCESSFULLY UPLOADED {uploaded_file_path}')
+        context = {}
+        return render(request, template_name, context)

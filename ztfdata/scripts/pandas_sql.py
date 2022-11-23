@@ -1,3 +1,4 @@
+import numpy as np
 from ztfdata.models import PandasData
 from .parse_fp import DataRetrieval
 # Create your views here.
@@ -27,28 +28,29 @@ class DataIngestion(BaseCommand):
         else:
             self.dataframe = dr.process_dat()
         assert (type(self.dataframe) == pd.core.frame.DataFrame)
+        self.dataframe = self.dataframe.replace('null', np.nan, regex=True)
 
     def clean_df_andrew(self):
         """"
         A function to prepare the dataframe for Andrew before converting to PostgresDB 
         """
-        self.dataframe.dropna()
+        # self.dataframe.dropna()
         return self.dataframe
 
     def clean_df_mroz(self):
         """"
         A function to prepare the dataframe for Mrozpipe before converting to PostgresDB 
         """
-        self.dataframe.dropna(subset=['pid', 'bjd', 'mag', 'magerr', 'diffimflux',
-                              'diffimfluxunc', 'clrcoeff', 'clrcoeffunc', 'infobits'])
+        # self.dataframe.dropna(subset=['pid', 'bjd', 'mag', 'magerr', 'diffimflux',
+        #                       'diffimfluxunc', 'clrcoeff', 'clrcoeffunc', 'infobits'])
         return self.dataframe
 
     def clean_df_ztffps(self):
         """"
         A function to prepare the dataframe for ztffps before converting to PostgresDB 
         """
-        self.dataframe.dropna(subset=['pid', 'jd', 'nearestrefmag', 'nearestrefmagunc',
-                              'forcediffimflux', 'forcediffimfluxunc', 'clrcoeff', 'clrcoeffunc', 'infobitssci'])
+        # self.dataframe.dropna(subset=['pid', 'jd', 'nearestrefmag', 'nearestrefmagunc',
+        #                    'forcediffimflux', 'forcediffimfluxunc', 'clrcoeff', 'clrcoeffunc', 'infobitssci'])
         return self.dataframe
 
     def process_pandas_to_sql(self):
