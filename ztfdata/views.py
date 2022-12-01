@@ -9,6 +9,8 @@ from ztfdata.scripts.pandas_sql import DataIngestion
 from .models import PandasData
 from django.core.files.storage import FileSystemStorage
 import os
+import json
+import pandas as pd
 # Create your views here.
 
 
@@ -50,7 +52,7 @@ def UploadView(request):
         else:
             raise Exception(
                 "The input is not a product of a valid photometry pipeline")
-        
+
         cleaned_data = DataIngestion(uploaded_file_path, pipeline)
         cleaned_data.process_pandas_to_sql()
         # for model in df.itertuples():
@@ -137,3 +139,17 @@ def UploadView(request):
         #                   'procstatus': model.procstatus})
         context = {}
         return render(request, template_name, context)
+
+
+def DataView(request):
+    data = PandasData.objects.all()
+    context = {
+        "forced_photometry": data
+    }
+    df_assets = pd.DataFrame(list(data.values()))
+    # parsing the DataFrame in json format.
+    json_records = df_assets.reset_index().to_json(orient='records')
+    data = []
+    data = json.loads(json_records)
+    context = {'d': data}
+    return render(request, 'table.html', context)
