@@ -11,15 +11,15 @@ from django.core.files.storage import FileSystemStorage
 import os
 import json
 import pandas as pd
-# Create your views here.
 
 
 def UploadView(request):
-    # declaring template
+    """
+    When Django handles a file upload, the file data ends up placed in request.FILES 
+    """
     template_name = "upload.html"
     data = PandasData.objects.all()
-    # prompt is a context variable that can have different values
-    # depending on their context
+    # prompt is a context variable that can have different values depending on their context
     prompt = {
         'order': 'Order of the dat file parameters should be index, field, ccdid, qid, filter, pid, infobitssci, sciinpseeing, scibckgnd, scisigpix, zpmaginpsci, zpmaginpsciunc, zpmaginpscirms, clrcoeff, clrcoeffunc, ncalmatches, exptime, adpctdif1, adpctdif2, diffmaglim, zpdiff, programid, jd, rfid, forcediffimflux, forcediffimfluxunc, forcediffimsnr, forcediffimchisq, forcediffimfluxap, forcediffimfluxuncap, forcediffimsnrap, aperturecorr, dnearestrefsrc, nearestrefmag, nearestrefmagunc, nearestrefchi, nearestrefsharp, refjdstart, refjdend, procstatus',
         'profiles': data
@@ -27,10 +27,13 @@ def UploadView(request):
     # GET request returns the value of the data with the specified key.
     if request.method == "GET":
         return render(request, template_name, prompt)
+    # POST request parses the contents of the uploaded file and appends it to PostgreSQL
     elif request.method == 'POST':
         rel_filepath = request.FILES['file']
+        # Check that the file is of the correct type
         if not rel_filepath.name.endswith('.dat') or not rel_filepath.name.endswith('.phot'):
             messages.error(request, 'THIS IS NOT A DAT OR PHOT FILE')
+        # In order to parse the contents of the uploaded file, the file has to be saved temporarily
         base_dir = os.path.join(os.getcwd(), 'uploaded_data')
         if not os.path.exists(base_dir):
             os.makedirs(base_dir)
@@ -53,18 +56,26 @@ def UploadView(request):
             raise Exception(
                 "The input is not a product of a valid photometry pipeline")
 
+        # create a DataIngestion object so that the uploaded data can be converted from a Pandas DataFrame to PostgreSQL
         cleaned_data = DataIngestion(uploaded_file_path, pipeline)
+
+        # run process_pandas_to_sql() to append the ingested data to PostgreSQL
+        # remove the saved file to conserve memory
         try:
             cleaned_data.process_pandas_to_sql()
             os.remove(uploaded_file_path)
         except BaseException as e:
-            messages.error(request, f"Process failed due to the following error: \n {e}")
-
+            messages.error(
+                request, f"Process failed due to the following error: \n {e}")
         context = {}
         return render(request, template_name, context)
 
 
 def DataView(request):
+    """
+    Read data from PostgreSQL database table into a pandas dataframe and display it 
+    in a custom html table defined in table.html
+    """
     data = PandasData.objects.all()
     context = {
         "forced_photometry": data

@@ -52,6 +52,16 @@ class DataIngestion(BaseCommand):
         """
         Function to convert Pandas DataFrame to Postgres DB by authenticating using information in .env and using Pandas.sql method
         """
+
+        # establish connection to PostgreSQL by reading fields from Django settings
+        user = settings.DATABASES['default']['USER']
+        password = settings.DATABASES['default']['PASSWORD']
+        database_name = settings.DATABASES['default']['NAME']
+        host = settings.DATABASES['default']['HOST']
+        port = settings.DATABASES['default']['PORT']
+        conn_string = f'postgresql://{user}:{password}@{host}:{port}/{database_name}'
+        engine = create_engine(conn_string, echo=False)
+        
         if self.pipeline == "a":
             self.clean_df_andrew()
         elif self.pipeline == "m":
@@ -61,15 +71,7 @@ class DataIngestion(BaseCommand):
         else:
             raise Exception(
                 "The input is not a product of a valid photometry pipeline")
-        print(self.dataframe.head(5))
-        # establish connection to PostgreSQL by reading fields from Django settings
-        user = settings.DATABASES['default']['USER']
-        password = settings.DATABASES['default']['PASSWORD']
-        database_name = settings.DATABASES['default']['NAME']
-        host = settings.DATABASES['default']['HOST']
-        port = settings.DATABASES['default']['PORT']
-        conn_string = f'postgresql://{user}:{password}@{host}:{port}/{database_name}'
-        engine = create_engine(conn_string, echo=False)
+        
         self.dataframe.to_sql(PandasData._meta.db_table,
                               con=engine, if_exists='append')
         return self.dataframe
