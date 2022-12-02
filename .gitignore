@@ -80,3 +80,6 @@ coverage.xml
 
 # Sphinx documentation
 docs/_build/
+
+# Delete uploaded data folder
+uploaded_data

@@ -59,7 +59,6 @@ INSTALLED_APPS = [
 
     # my application
     'ztfdata',
-    'data_processing',
 ]
 
 MIDDLEWARE = [
@@ -111,7 +110,7 @@ DATABASES = {
         'USER': user,
         'PASSWORD' : password,
         'HOST': host,
-        'PORT': 5432
+        'PORT': 5432,
     }
 }
 

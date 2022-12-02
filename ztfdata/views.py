@@ -4,11 +4,13 @@ from django.shortcuts import render
 from django.shortcuts import render
 from django.contrib import messages
 
-from data_processing.utils.pandas_sql import DataIngestion
+from ztfdata.scripts.pandas_sql import DataIngestion
 
 from .models import PandasData
 from django.core.files.storage import FileSystemStorage
 import os
+import json
+import pandas as pd
 # Create your views here.
 
 
@@ -50,90 +52,27 @@ def UploadView(request):
         else:
             raise Exception(
                 "The input is not a product of a valid photometry pipeline")
-        
+
         cleaned_data = DataIngestion(uploaded_file_path, pipeline)
-        df = cleaned_data.process_pandas_to_sql()
-        for model in df.itertuples():
-            _, created = PandasData.objects.update_or_create(
-                index=model.index,
-                field=model.field,
-                ccdid=model.ccdid,
-                qid=model.qid,
-                filter=model.qid,
-                pid=model.pid,
-                infobitssci=model.infobitssci,
-                sciinpseeing=model.sciinpseeing,
-                scibckgnd=model.scibckgnd,
-                scisigpix=model.scisigpix,
-                zpmaginpsci=model.zpmaginpsci,
-                zpmaginpsciunc=model.zpmaginpsciunc,
-                zpmaginpscirms=model.zpmaginpscirms,
-                clrcoeff=model.clrcoeff,
-                clrcoeffunc=model.clrcoeffunc,
-                ncalmatches=model.ncalmatches,
-                exptime=model.exptime,
-                adpctdif1=model.adpctdif1,
-                adpctdif2=model.adpctdif2,
-                diffmaglim=model.diffmaglim,
-                zpdiff=model.zpdiff,
-                programid=model.programid,
-                jd=model.jd,
-                rfid=model.rfid,
-                forcediffimflux=model.forcediffimflux,
-                forcediffimfluxunc=model.forcediffimfluxunc,
-                forcediffimsnr=model.forcediffimsnr,
-                forcediffimchisq=model.forcediffimchisq,
-                forcediffimfluxap=model.forcediffimfluxap,
-                forcediffimfluxuncap=model.forcediffimfluxuncap,
-                forcediffimsnrap=model.forcediffimsnrap,
-                aperturecorr=model.aperturecorr,
-                dnearestrefsrc=model.dnearestrefsrc,
-                nearestrefmag=model.nearestrefmag,
-                nearestrefmagunc=model.nearestrefmagunc,
-                nearestrefchi=model.nearestrefchi,
-                nearestrefsharp=model.nearestrefsharp,
-                refjdstart=model.refjdstart,
-                refjdend=model.refjdend,
-                procstatus=model.procstatus,
-                defaults={'index': model.index,
-                          'field': model.field,
-                          'ccdid': model.ccdid,
-                          'qid': model.qid,
-                          'filter': model.qid,
-                          'pid': model.pid,
-                          'infobitssci': model.infobitssci,
-                          'sciinpseeing': model.sciinpseeing,
-                          'scibckgnd': model.scibckgnd,
-                          'scisigpix': model.scisigpix,
-                          'zpmaginpsci': model.zpmaginpsci,
-                          'zpmaginpsciunc': model.zpmaginpsciunc,
-                          'zpmaginpscirms': model.zpmaginpscirms,
-                          'clrcoeff': model.clrcoeff,
-                          'clrcoeffunc': model.clrcoeffunc,
-                          'ncalmatches': model.ncalmatches,
-                          'exptime': model.exptime,
-                          'adpctdif1': model.adpctdif1,
-                          'adpctdif2': model.adpctdif2,
-                          'diffmaglim': model.diffmaglim,
-                          'zpdiff': model.zpdiff,
-                          'programid': model.programid,
-                          'jd': model.jd,
-                          'rfid': model.rfid,
-                          'forcediffimflux': model.forcediffimflux,
-                          'forcediffimfluxunc': model.forcediffimfluxunc,
-                          'forcediffimsnr': model.forcediffimsnr,
-                          'forcediffimchisq': model.forcediffimchisq,
-                          'forcediffimfluxap': model.forcediffimfluxap,
-                          'forcediffimfluxuncap': model.forcediffimfluxuncap,
-                          'forcediffimsnrap': model.forcediffimsnrap,
-                          'aperturecorr': model.aperturecorr,
-                          'dnearestrefsrc': model.dnearestrefsrc,
-                          'nearestrefmag': model.nearestrefmag,
-                          'nearestrefmagunc': model.nearestrefmagunc,
-                          'nearestrefchi': model.nearestrefchi,
-                          'nearestrefsharp': model.nearestrefsharp,
-                          'refjdstart': model.refjdstart,
-                          'refjdend': model.refjdend,
-                          'procstatus': model.procstatus})
+        try:
+            cleaned_data.process_pandas_to_sql()
+            os.remove(uploaded_file_path)
+        except BaseException as e:
+            messages.error(request, f"Process failed due to the following error: \n {e}")
+
         context = {}
         return render(request, template_name, context)
+
+
+def DataView(request):
+    data = PandasData.objects.all()
+    context = {
+        "forced_photometry": data
+    }
+    df_assets = pd.DataFrame(list(data.values()))
+    # parsing the DataFrame in json format.
+    json_records = df_assets.reset_index().to_json(orient='records')
+    data = []
+    data = json.loads(json_records)
+    context = {'d': data}
+    return render(request, 'table.html', context)

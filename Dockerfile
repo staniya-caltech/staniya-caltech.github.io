@@ -21,7 +21,6 @@ COPY ./Pipfile Pipfile.lock /usr/src/app/
 COPY ./requirements.txt .
 RUN pip install -r requirements.txt
 
-# Custom initialization scripts
 COPY /postgres/create_user.sh   /docker-entrypoint-initdb.d/10-create_user.sh
 COPY /postgres/create_db.sh     /docker-entrypoint-initdb.d/20-create_db.sh
 COPY /postgres/create_extensions.sh     /docker-entrypoint-initdb.d/30-create_extensions.sh
