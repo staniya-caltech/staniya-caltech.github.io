@@ -83,5 +83,5 @@ class PandasData(models.Model):
         return self.index
 
 
-    class Meta:
-        ordering = ['index']
+    # class Meta:
+    #     ordering = ['index']
