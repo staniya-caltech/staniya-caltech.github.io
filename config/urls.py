@@ -19,6 +19,6 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     # Local apps
-    path('', include('ztfdata.urls')),
+    path('', include('fpdata.urls')),
     
 ]

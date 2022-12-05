@@ -15,12 +15,14 @@
 #             print(other_dataframe.isnull().sum())
 #             print(other_dataframe.dtypes)
 
-from pandas_sql import DataIngestion
+
+
+from fpdata.scripts.pandas_sql import DataIngestion
 
 
 def test_data_ingestion(data_list):
     for data in data_list:
-        data = DataIngestion(data)
+        data = DataIngestion(data)  # type: ignore
         df = data.process_pandas_to_sql()
         print(df.head())
         print(df.isnull().sum())

@@ -58,7 +58,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # my application
-    'ztfdata',
+    'fpdata',
 ]
 
 MIDDLEWARE = [
@@ -95,9 +95,9 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 env_dict = populate_args_from_dotenv()
-assert(type(env_dict) == OrderedDict)
+assert(isinstance(env_dict, OrderedDict))
 if env_dict != None:
-        host= "ztfdb"
+        host= "db"
         database = "postgres"
         user = env_dict['POSTGRES_USER']
         password = env_dict['POSTGRES_PASSWORD']

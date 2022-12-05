@@ -11,9 +11,9 @@ services:
     env_file:
       - ./.env.dev
     depends_on:
-      - ztfdb
+      - db
 
-  ztfdb:
+  db:
     image: postgres:15.0
     restart: always
     environment:

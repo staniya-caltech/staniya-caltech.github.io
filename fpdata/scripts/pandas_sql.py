@@ -1,5 +1,5 @@
 import numpy as np
-from ztfdata.models import PandasData
+from fpdata.models import ZTFFPSData, MROZData
 from .parse_fp import DataRetrieval
 # Create your views here.
 # Create your models here.
@@ -27,7 +27,7 @@ class DataIngestion(BaseCommand):
             self.dataframe = dr.process_phot()
         else:
             self.dataframe = dr.process_dat()
-        assert (type(self.dataframe) == pd.core.frame.DataFrame)
+        assert (isinstance(self.dataframe, pd.DataFrame))
         self.dataframe = self.dataframe.replace('null', np.nan, regex=True)
 
     def clean_df_andrew(self):
@@ -46,22 +46,14 @@ class DataIngestion(BaseCommand):
         """"
         A function to prepare the dataframe for ztffps before converting to PostgresDB 
         """
+        self.dataframe = self.dataframe.drop(columns=['index'])
         return self.dataframe
 
     def process_pandas_to_sql(self):
         """
         Function to convert Pandas DataFrame to Postgres DB by authenticating using information in .env and using Pandas.sql method
         """
-        if self.pipeline == "a":
-            self.clean_df_andrew()
-        elif self.pipeline == "m":
-            self.clean_df_mroz()
-        elif self.pipeline == "z":
-            self.clean_df_ztffps()
-        else:
-            raise Exception(
-                "The input is not a product of a valid photometry pipeline")
-        print(self.dataframe.head(5))
+
         # establish connection to PostgreSQL by reading fields from Django settings
         user = settings.DATABASES['default']['USER']
         password = settings.DATABASES['default']['PASSWORD']
@@ -70,6 +62,20 @@ class DataIngestion(BaseCommand):
         port = settings.DATABASES['default']['PORT']
         conn_string = f'postgresql://{user}:{password}@{host}:{port}/{database_name}'
         engine = create_engine(conn_string, echo=False)
-        self.dataframe.to_sql(PandasData._meta.db_table,
-                              con=engine, if_exists='append')
+
+        if self.pipeline == "a":
+            self.clean_df_andrew()
+            
+        elif self.pipeline == "m":
+            self.clean_df_mroz()
+            self.dataframe.to_sql(MROZData._meta.db_table,
+                                  con=engine, if_exists='replace')
+        elif self.pipeline == "z":
+            self.clean_df_ztffps()
+            self.dataframe.to_sql(ZTFFPSData._meta.db_table,
+                                  con=engine, if_exists='replace')
+        else:
+            raise Exception(
+                "The input is not a product of a valid photometry pipeline")
+
         return self.dataframe
