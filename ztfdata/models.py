@@ -152,6 +152,7 @@ class MROZData(models.Model):
     airmass = Airmass of science image
     nps1matches = Number of PS1 calibrators used in initial calibration of sci image
     """
+    id = models.IntegerField(primary_key=True)
     bjd = models.DecimalField(
         max_digits=100, decimal_places=10, null=True)
     mag = models.DecimalField(
@@ -201,5 +202,5 @@ class MROZData(models.Model):
         return self.bjd
     
     class Meta:
-        ordering = ['bjd']
+        ordering = [models.F('bjd').desc(nulls_last=True)]
 

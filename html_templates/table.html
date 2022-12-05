@@ -10,8 +10,9 @@
 <body>
     <div class="content">
         <div class="container">
-            <h2 class="text-center"><u>ZTFFPS Forced Photometry Data</u></h2><br>
+            <h2 class="text-center"><u>Forced Photometry Data</u></h2><br>
             <table class="table">
+                {% if ztffps %}
                 <thead>
                     <tr>
                         <th>index</th>
@@ -58,8 +59,8 @@
                 </thead>
                 <tbody>
                     <!-- jinja2 Technique -->
-                    {% if d %}
-                    {% for i in d %}
+
+                    {% for i in ztffps %}
                     <tr>
                         <td>{{i.index}}</td>
                         <td>{{i.field}}</td>
@@ -103,8 +104,69 @@
                         <td>{{i.procstatus}}</td>
                     </tr>
                     {% endfor %}
-                    {% endif %}
                 </tbody>
+                {% endif %}
+
+                {% if mroz %}
+                <thead>
+                    <tr>
+                        <th>bjd</th>
+                        <th>mag</th>
+                        <th>magerr</th>
+                        <th>diffimflux</th>
+                        <th>diffimfluxunc</th>
+                        <th>flag</th>
+                        <th>filterid</th>
+                        <th>exptime</th>
+                        <th>pid</th>
+                        <th>field</th>
+                        <th>ccd</th>
+                        <th>quad</th>
+                        <th>status</th>
+                        <th>infobits</th>
+                        <th>seeing</th>
+                        <th>zpmagsci</th>
+                        <th>zpmagsciunc</th>
+                        <th>zpmagscirms</th>
+                        <th>clrcoeff</th>
+                        <th>clrcoeffunc</th>
+                        <th>maglim</th>
+                        <th>airmass</th>
+                        <th>nps1matches</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- jinja2 Technique -->
+
+                    {% for j in mroz %}
+                    <tr>
+                        <td>{{j.bjd}}</td>
+                        <td>{{j.mag}}</td>
+                        <td>{{j.magerr}}</td>
+                        <td>{{j.diffimflux}}</td>
+                        <td>{{j.diffimfluxunc}}</td>
+                        <td>{{j.flag}}</td>
+                        <td>{{j.filterid}}</td>
+                        <td>{{j.exptime}}</td>
+                        <td>{{j.pid}}</td>
+                        <td>{{j.field}}</td>
+                        <td>{{j.ccd}}</td>
+                        <td>{{j.quad}}</td>
+                        <td>{{j.status}}</td>
+                        <td>{{j.infobits}}</td>
+                        <td>{{j.seeing}}</td>
+                        <td>{{j.zpmagsci}}</td>
+                        <td>{{j.zpmagsciunc}}</td>
+                        <td>{{j.zpmagscirms}}</td>
+                        <td>{{j.clrcoeff}}</td>
+                        <td>{{j.clrcoeffunc}}</td>
+                        <td>{{j.maglim}}</td>
+                        <td>{{j.airmass}}</td>
+                        <td>{{j.nps1matches}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                {% endif %}
             </table>
         </div>
     </div>

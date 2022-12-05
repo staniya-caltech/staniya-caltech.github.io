@@ -81,14 +81,24 @@ def DataView(request):
     Read data from PostgreSQL database table into a pandas dataframe and display it 
     in a custom html table defined in table.html
     """
-    data = ZTFFPSData.objects.all()
+    ztffpsdata = ZTFFPSData.objects.all()
+    mrozdata = MROZData.objects.all()
     context = {
-        "forced_photometry": data
+        "ztffps_forced_photometry": ztffpsdata,
+        "mroz_forced_photometry": mrozdata
     }
-    df_assets = pd.DataFrame(list(data.values()))
+    # For ztffps
+    ztffps_assets = pd.DataFrame(list(ztffpsdata.values()))
     # parsing the DataFrame in json format.
-    json_records = df_assets.reset_index().to_json(orient='records')
-    data = []
-    data = json.loads(json_records)
-    context = {'d': data}
+    ztffps_json_records = ztffps_assets.reset_index().to_json(orient='records')
+    ztffps_data = []
+    ztffps_data = json.loads(ztffps_json_records)
+
+    # For mroz
+    mroz_assets = pd.DataFrame(list(mrozdata.values()))
+    # parsing the DataFrame in json format.
+    mroz_json_records = mroz_assets.reset_index().to_json(orient='records')
+    mroz_data = []
+    mroz_data = json.loads(mroz_json_records)
+    context = {'ztffps': ztffps_data, 'mroz': mroz_data}
     return render(request, 'table.html', context)
