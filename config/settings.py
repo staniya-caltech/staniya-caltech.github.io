@@ -97,7 +97,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 env_dict = populate_args_from_dotenv()
 assert(type(env_dict) == OrderedDict)
 if env_dict != None:
-        host= "ztfdb"
+        host= "db"
         database = "postgres"
         user = env_dict['POSTGRES_USER']
         password = env_dict['POSTGRES_PASSWORD']
