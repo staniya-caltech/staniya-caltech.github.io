@@ -64,14 +64,15 @@ class DataIngestion(BaseCommand):
 
         if self.pipeline == "a":
             self.clean_df_andrew()
-            self.dataframe.to_sql(ZTFFPSData._meta.db_table,
-                                  con=engine, if_exists='append')
+            
         elif self.pipeline == "m":
             self.clean_df_mroz()
             self.dataframe.to_sql(MROZData._meta.db_table,
                                   con=engine, if_exists='append')
         elif self.pipeline == "z":
             self.clean_df_ztffps()
+            self.dataframe.to_sql(ZTFFPSData._meta.db_table,
+                                  con=engine, if_exists='append')
         else:
             raise Exception(
                 "The input is not a product of a valid photometry pipeline")

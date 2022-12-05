@@ -95,7 +95,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 env_dict = populate_args_from_dotenv()
-assert(type(env_dict) == OrderedDict)
+assert(isinstance(env_dict, OrderedDict))
 if env_dict != None:
         host= "db"
         database = "postgres"

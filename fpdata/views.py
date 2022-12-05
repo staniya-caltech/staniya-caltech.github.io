@@ -73,10 +73,10 @@ def UploadView(request):
         # remove the saved file to conserve memory
         try:
             cleaned_data.process_pandas_to_sql()
-            os.remove(uploaded_file_path)
-        except BaseException as e:
+        except Exception as e:
             messages.error(
                 request, f"Process failed due to the following error: \n {e}")
+        os.remove(uploaded_file_path)
         context = {}
         return render(request, template_name, context)
 
