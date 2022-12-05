@@ -58,7 +58,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # my application
-    'ztfdata',
+    'fpdata',
 ]
 
 MIDDLEWARE = [

@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.shortcuts import render
 from django.contrib import messages
 
-from ztfdata.scripts.pandas_sql import DataIngestion
+from fpdata.scripts.pandas_sql import DataIngestion
 
 from .models import MROZData, ZTFFPSData
 from django.core.files.storage import FileSystemStorage

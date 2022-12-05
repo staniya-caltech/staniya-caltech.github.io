@@ -1,5 +1,5 @@
 import numpy as np
-from ztfdata.models import ZTFFPSData, MROZData
+from fpdata.models import ZTFFPSData, MROZData
 from .parse_fp import DataRetrieval
 # Create your views here.
 # Create your models here.
