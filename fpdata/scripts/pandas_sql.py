@@ -46,7 +46,7 @@ class DataIngestion(BaseCommand):
         """"
         A function to prepare the dataframe for ztffps before converting to PostgresDB 
         """
-        self.dataframe.drop(columns=['index'])
+        self.dataframe = self.dataframe.drop(columns=['index'])
         return self.dataframe
 
     def process_pandas_to_sql(self):
