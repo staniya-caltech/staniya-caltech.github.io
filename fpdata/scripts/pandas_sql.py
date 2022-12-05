@@ -46,6 +46,7 @@ class DataIngestion(BaseCommand):
         """"
         A function to prepare the dataframe for ztffps before converting to PostgresDB 
         """
+        self.dataframe.drop(columns=['index'])
         return self.dataframe
 
     def process_pandas_to_sql(self):
@@ -68,11 +69,11 @@ class DataIngestion(BaseCommand):
         elif self.pipeline == "m":
             self.clean_df_mroz()
             self.dataframe.to_sql(MROZData._meta.db_table,
-                                  con=engine, if_exists='append')
+                                  con=engine, if_exists='replace')
         elif self.pipeline == "z":
             self.clean_df_ztffps()
             self.dataframe.to_sql(ZTFFPSData._meta.db_table,
-                                  con=engine, if_exists='append')
+                                  con=engine, if_exists='replace')
         else:
             raise Exception(
                 "The input is not a product of a valid photometry pipeline")

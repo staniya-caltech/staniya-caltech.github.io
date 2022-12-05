@@ -123,7 +123,10 @@ class ZTFFPSData(models.Model):
     procstatus = models.CharField(max_length=100, null=True)
 
     def __str__(self):
-        return self.index
+        return str(self.index)
+
+    class Meta:
+        ordering = [models.F('jd').desc(nulls_last=True)]
 
 
 class MROZData(models.Model):
@@ -152,7 +155,7 @@ class MROZData(models.Model):
     airmass = Airmass of science image
     nps1matches = Number of PS1 calibrators used in initial calibration of sci image
     """
-    id = models.IntegerField(primary_key=True)
+    index = models.IntegerField(primary_key=True)
     bjd = models.DecimalField(
         max_digits=100, decimal_places=10, null=True)
     mag = models.DecimalField(
@@ -199,7 +202,7 @@ class MROZData(models.Model):
     nps1matches = models.IntegerField(null=True)
 
     def __str__(self):
-        return self.bjd
+        return self.index
     
     class Meta:
         ordering = [models.F('bjd').desc(nulls_last=True)]
