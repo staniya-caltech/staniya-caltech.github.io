@@ -20,7 +20,7 @@ class DataRetrieval:
 
     def process_phot(self):
         """
-        Function to parse contents of phot file and write it as a csv
+        Function to parse contents of phot file and write it as a Pandas dataframe
         """
         assert (os.path.splitext(self.rel_filepath)[-1].lower() == ".phot")
         header = ["PS1_ID", "MJD", "Mag_ZTF", "Mag_err", "Flux",
@@ -35,7 +35,7 @@ class DataRetrieval:
 
     def process_dat(self):
         """
-        Function to parse contents of dat file and write it as a csv
+        Function to parse contents of dat file and write it as a Pandas dataframe
         """
         assert (os.path.splitext(self.rel_filepath)[-1].lower() == ".dat")
 

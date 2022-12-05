@@ -1,5 +1,5 @@
 import numpy as np
-from ztfdata.models import PandasData
+from ztfdata.models import ZTFFPSData, MROZData
 from .parse_fp import DataRetrieval
 # Create your views here.
 # Create your models here.
@@ -61,17 +61,19 @@ class DataIngestion(BaseCommand):
         port = settings.DATABASES['default']['PORT']
         conn_string = f'postgresql://{user}:{password}@{host}:{port}/{database_name}'
         engine = create_engine(conn_string, echo=False)
-        
+
         if self.pipeline == "a":
             self.clean_df_andrew()
+            self.dataframe.to_sql(ZTFFPSData._meta.db_table,
+                              con=engine, if_exists='append')
         elif self.pipeline == "m":
             self.clean_df_mroz()
+            self.dataframe.to_sql(MROZData._meta.db_table,
+                              con=engine, if_exists='append')
         elif self.pipeline == "z":
             self.clean_df_ztffps()
         else:
             raise Exception(
                 "The input is not a product of a valid photometry pipeline")
         
-        self.dataframe.to_sql(PandasData._meta.db_table,
-                              con=engine, if_exists='append')
         return self.dataframe
