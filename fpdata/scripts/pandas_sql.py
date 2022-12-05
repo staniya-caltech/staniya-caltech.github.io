@@ -27,7 +27,7 @@ class DataIngestion(BaseCommand):
             self.dataframe = dr.process_phot()
         else:
             self.dataframe = dr.process_dat()
-        assert (type(self.dataframe) == pd.core.frame.DataFrame)
+        assert (isinstance(self.dataframe, pd.DataFrame))
         self.dataframe = self.dataframe.replace('null', np.nan, regex=True)
 
     def clean_df_andrew(self):
@@ -65,15 +65,15 @@ class DataIngestion(BaseCommand):
         if self.pipeline == "a":
             self.clean_df_andrew()
             self.dataframe.to_sql(ZTFFPSData._meta.db_table,
-                              con=engine, if_exists='append')
+                                  con=engine, if_exists='append')
         elif self.pipeline == "m":
             self.clean_df_mroz()
             self.dataframe.to_sql(MROZData._meta.db_table,
-                              con=engine, if_exists='append')
+                                  con=engine, if_exists='append')
         elif self.pipeline == "z":
             self.clean_df_ztffps()
         else:
             raise Exception(
                 "The input is not a product of a valid photometry pipeline")
-        
+
         return self.dataframe

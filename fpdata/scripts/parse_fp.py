@@ -1,6 +1,6 @@
 import os, sys
 import pandas as pd
-from stat import *
+import stat
 
 class DataRetrieval:
     """ Data retrieval class extracts data from different forced photometry pipelines"""
@@ -30,7 +30,7 @@ class DataRetrieval:
         with open(self.rel_filepath, "r") as in_file:
             mod_file = list(in_file)
             for i, line in enumerate(mod_file):
-                mod_file[i] = line.strip().split(" ")
+                mod_file[i] = line.strip().split(" ")  # type: ignore
         return pd.DataFrame(mod_file, columns=header)
 
     def process_dat(self):
