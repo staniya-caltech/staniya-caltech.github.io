@@ -6,7 +6,7 @@ from django.contrib import messages
 
 from fpdata.scripts.pandas_sql import DataIngestion
 
-from .models import MROZData, ZTFFPSData
+from .models import AndrewData, MROZData, ZTFFPSData
 from django.core.files.storage import FileSystemStorage
 import os
 import json
@@ -20,6 +20,7 @@ def UploadView(request):
     template_name = "upload.html"
     ztffps_data = ZTFFPSData.objects.all()
     mroz_data = MROZData.objects.all()
+    andrew_data = AndrewData.objects.all()
     # prompt is a context variable that can have different values depending on their context
     prompt = {
         'order': 'ZTFFPS file parameters should be: index, field, ccdid, qid, filter, pid, infobitssci, \
@@ -30,9 +31,11 @@ def UploadView(request):
             nearestrefsharp, refjdstart, refjdend, procstatus \n\n \
             MROZ file parameters should be: bjd mag magerr diffimflux diffimfluxunc flag filterid exptime pid \
             field ccd quad status infobits seeing zpmagsci zpmagsciunc zpmagscirms clrcoeff clrcoeffunc maglim \
-            airmass nps1matches',
+            airmass nps1matches \n\n \
+            ANDREW file parameters should be: PS1_ID MJD Mag_ZTF  Mag_err Flux Flux_err g_PS1 r_PS1 i_PS1 Stargal infobits',
         'ztffps_profile': ztffps_data,
         'mroz_profile': mroz_data,
+        'andrew_profile': andrew_data,
     }
 
     # GET request returns the value of the data with the specified key.
@@ -49,7 +52,7 @@ def UploadView(request):
         if not os.path.exists(base_dir):
             os.makedirs(base_dir)
         if "ps1" in rel_filepath.name:
-            fs = FileSystemStorage(location=os.path.join(base_dir, 'Andrew'))
+            fs = FileSystemStorage(location=os.path.join(base_dir, 'andrew'))
             filename = fs.save(rel_filepath.name, rel_filepath)
             uploaded_file_path = fs.path(filename)
             pipeline = "a"
@@ -88,9 +91,11 @@ def DataView(request):
     """
     ztffpsdata = ZTFFPSData.objects.all()
     mrozdata = MROZData.objects.all()
+    andrewdata = AndrewData.objects.all()
     context = {
         "ztffps_forced_photometry": ztffpsdata,
-        "mroz_forced_photometry": mrozdata
+        "mroz_forced_photometry": mrozdata,
+        "andrew_forced_photometry": andrewdata
     }
     # For ztffps
     ztffps_assets = pd.DataFrame(list(ztffpsdata.values()))
@@ -105,5 +110,13 @@ def DataView(request):
     mroz_json_records = mroz_assets.reset_index().to_json(orient='records')
     mroz_data = []
     mroz_data = json.loads(mroz_json_records)
-    context = {'ztffps': ztffps_data, 'mroz': mroz_data}
+
+    # For andrew
+    andrew_assets = pd.DataFrame(list(andrewdata.values()))
+    # parsing the DataFrame in json format.
+    andrew_json_records = andrew_assets.reset_index().to_json(orient='records')
+    andrew_data = []
+    andrew_data = json.loads(andrew_json_records)
+
+    context = {'ztffps': ztffps_data, 'mroz': mroz_data, 'andrew': andrew_data}
     return render(request, 'table.html', context)

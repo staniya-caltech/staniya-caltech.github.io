@@ -50,10 +50,10 @@ class ZTFFPSData(models.Model):
     procstatus = Per-epoch processing status codes (0 => no warnings); if non-zero, see accompanying log file and document link below
     """
     index = models.IntegerField(primary_key=True)
-    field = models.IntegerField(null=True)
-    ccdid = models.IntegerField(null=True)
-    qid = models.IntegerField(null=True)
-    filter = models.CharField(max_length=5, null=True)
+    field = models.IntegerField()
+    ccdid = models.IntegerField()
+    qid = models.IntegerField()
+    filter = models.CharField(max_length=5)
     pid = models.BigIntegerField(null=True)
     infobitssci = models.IntegerField(null=True)
     sciinpseeing = models.DecimalField(
@@ -206,4 +206,52 @@ class MROZData(models.Model):
     
     class Meta:
         ordering = [models.F('bjd').desc(nulls_last=True)]
+
+
+
+class AndrewData(models.Model):
+    """
+    PS1_ID = The Pan-STARRS1 survey used a 1.8 meter telescope and its 1.4 Gigapixel camera (GPC1; see PS1 GPC1 camera) to image the sky in five broadband filters (g, r, i, z, y) [ID]
+    MJD = A continuous measure in days since midnight at the start of 17 November 1858 [days]
+    Mag_ZTF = Source magnitude using above intrumental magnitude to scale the difference image flux [mag]
+    Mag_err = Uncertainty on source magnitude [mag]
+    Flux = Absolute flux of object operating on science images [DN]
+    Flux_err = flux error [DN]
+    Color Coefficient Magnitudes [DN] = When you measure the flux of an image, you have to obtain a 
+                                        flux so that you can prepare a magnitude of the other systems. 
+                                        You measure the raw flux of the image and you measure the magnitude 
+                                        of reference/ std. stars (established from other surveys). 
+                                        Calibrate other surveys to match the std. stars to survey values 
+        g_PS1 
+        r_PS1
+        i_PS1
+    Stargal = Stargal is unique to the science image case --> fitting a point-spread function to every image. 
+              Ideal PSF is a two-dimensional Gaussian, but in reality, the true PSF is going to be distorted. 
+              The elongation allows you to map the system based on it's width and height to fit the object. 
+              Thus, stargal represents a probability of whether a source represents a star or a galaxy [DN]
+    infobits = processing summary/QA bits for sci image
+    """
+    index = models.IntegerField(primary_key=True)
+    PS1_ID = models.BigIntegerField()
+    MJD = models.DecimalField(
+        max_digits=100, decimal_places=10, null=True)
+    Mag_ZTF = models.DecimalField(
+        max_digits=100, decimal_places=5, null=True)
+    Mag_err = models.DecimalField(
+        max_digits=20, decimal_places=15, null=True)
+
+    Flux = models.DecimalField(max_digits=100, decimal_places=10, null=True)
+    Flux_err = models.DecimalField(max_digits=100, decimal_places=10, null=True)
+    g_PS1 = models.DecimalField(max_digits=100, decimal_places=10, null=True)
+    r_PS1 = models.DecimalField(max_digits=100, decimal_places=10, null=True)
+    i_PS1 = models.DecimalField(max_digits=100, decimal_places=10, null=True)
+    Stargal = models.DecimalField(
+        max_digits=20, decimal_places=15, null=True)
+    infobits = models.IntegerField(null=True)
+
+    def __str__(self):
+        return self.index
+    
+    class Meta:
+        ordering = [models.F('MJD').desc(nulls_last=True)]
 

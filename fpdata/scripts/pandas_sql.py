@@ -1,5 +1,5 @@
 import numpy as np
-from fpdata.models import ZTFFPSData, MROZData
+from fpdata.models import ZTFFPSData, MROZData, AndrewData
 from .parse_fp import DataRetrieval
 # Create your views here.
 # Create your models here.
@@ -65,7 +65,8 @@ class DataIngestion(BaseCommand):
 
         if self.pipeline == "a":
             self.clean_df_andrew()
-            
+            self.dataframe.to_sql(AndrewData._meta.db_table,
+                                  con=engine, if_exists='replace')
         elif self.pipeline == "m":
             self.clean_df_mroz()
             self.dataframe.to_sql(MROZData._meta.db_table,
