@@ -56,6 +56,9 @@ var/
 pip-log.txt
 pip-delete-this-directory.txt
 
+# IDE byproducts
+.vscode
+
 # Unit test / coverage reports
 .tox/
 .coverage

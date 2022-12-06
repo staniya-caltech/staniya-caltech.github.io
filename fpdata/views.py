@@ -32,7 +32,7 @@ def UploadView(request):
             MROZ file parameters should be: bjd mag magerr diffimflux diffimfluxunc flag filterid exptime pid \
             field ccd quad status infobits seeing zpmagsci zpmagsciunc zpmagscirms clrcoeff clrcoeffunc maglim \
             airmass nps1matches \n\n \
-            ANDREW file parameters should be: PS1_ID MJD Mag_ZTF  Mag_err Flux Flux_err g_PS1 r_PS1 i_PS1 Stargal infobits',
+            ANDREW file parameters should be: PS1_ID MJD Mag_ZTF Mag_err Flux Flux_err g_PS1 r_PS1 i_PS1 Stargal infobits',
         'ztffps_profile': ztffps_data,
         'mroz_profile': mroz_data,
         'andrew_profile': andrew_data,
