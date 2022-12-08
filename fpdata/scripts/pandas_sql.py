@@ -1,4 +1,5 @@
 import numpy as np
+import os
 from fpdata.models import ZTFFPSData, MROZData, AndrewData
 from .parse_fp import DataRetrieval
 # Create your views here.
@@ -30,24 +31,21 @@ class DataIngestion(BaseCommand):
         assert (isinstance(self.dataframe, pd.DataFrame))
         self.dataframe = self.dataframe.replace('null', np.nan, regex=True)
 
-    def clean_df_andrew(self):
+    def prep_df_andrew(self):
         """"
         A function to prepare the dataframe for Andrew before converting to PostgresDB 
         """
-        return self.dataframe
 
-    def clean_df_mroz(self):
+    def prep_df_mroz(self):
         """"
         A function to prepare the dataframe for Mrozpipe before converting to PostgresDB 
         """
-        return self.dataframe
 
-    def clean_df_ztffps(self):
+    def prep_df_ztffps(self):
         """"
         A function to prepare the dataframe for ztffps before converting to PostgresDB 
         """
         self.dataframe = self.dataframe.drop(columns=['index'])
-        return self.dataframe
 
     def process_pandas_to_sql(self):
         """
@@ -64,15 +62,15 @@ class DataIngestion(BaseCommand):
         engine = create_engine(conn_string, echo=False)
 
         if self.pipeline == "a":
-            self.clean_df_andrew()
+            self.prep_df_andrew()
             self.dataframe.to_sql(AndrewData._meta.db_table,
                                   con=engine, if_exists='replace')
         elif self.pipeline == "m":
-            self.clean_df_mroz()
+            self.prep_df_mroz()
             self.dataframe.to_sql(MROZData._meta.db_table,
                                   con=engine, if_exists='replace')
         elif self.pipeline == "z":
-            self.clean_df_ztffps()
+            self.prep_df_ztffps()
             self.dataframe.to_sql(ZTFFPSData._meta.db_table,
                                   con=engine, if_exists='replace')
         else:
