@@ -1,3 +1,11 @@
+-- strategy for loading data --> unlogged data without any indices applied
+-- load data afterwards --> cluster data
+-- time constraint --> figuring out the indices for each of the columns
+
+
+-- bulk upload data --> upload data first and do indices afterwards
+-- turn off transaction logging
+
 SET default_tablespace = stars_data_02;
 
     

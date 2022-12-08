@@ -202,7 +202,7 @@ class MROZData(models.Model):
     nps1matches = models.IntegerField(null=True)
 
     def __str__(self):
-        return self.index
+        return str(self.index)
     
     class Meta:
         ordering = [models.F('bjd').desc(nulls_last=True)]

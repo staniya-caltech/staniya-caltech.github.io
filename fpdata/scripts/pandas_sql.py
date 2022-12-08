@@ -9,7 +9,10 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 
 import pandas as pd
-from sqlalchemy import create_engine
+import psycopg2
+from psycopg2.extensions import AsIs
+
+import multiprocessing
 
 
 class DataIngestion(BaseCommand):
@@ -45,6 +48,9 @@ class DataIngestion(BaseCommand):
         _, PS1_ID, ccd, quad = os.path.basename(
             self.rel_filepath)[:-4].split("_")
         uniq_id = f"{PS1_ID}+{ccd}+{quad}"
+        # magnitude = calibration from reference image
+        # There's a column in the output --> magnitude of the nearest source detected in the reference images
+        
         return uniq_id
 
     def prep_df_ztffps(self):
@@ -53,28 +59,71 @@ class DataIngestion(BaseCommand):
         """
         self.dataframe.drop('index', axis=1, inplace=True)
 
+        # To get the magnitude, do not sum the forcediffumflux + nearest magnitude
+        # Look at the documentation to understand how to get the magnitude for difference images
+
         # Parse PS1_ID to get unique identifier
         _, PS1_ID, ccd, quad = os.path.basename(
             self.rel_filepath)[:-4].split("_")
         uniq_id = f"{PS1_ID}+{ccd}+{quad}"
         return uniq_id
 
-    def process_pandas_to_sql(self):
+    def runQuery(self, query):
         """
-        Function to convert Pandas DataFrame to Postgres DB by authenticating using information in .env and using Pandas.sql method
+        Function to run a query in PostgreSQL
         """
-
         # establish connection to PostgreSQL by reading fields from Django settings
         user = settings.DATABASES['default']['USER']
         password = settings.DATABASES['default']['PASSWORD']
         database_name = settings.DATABASES['default']['NAME']
         host = settings.DATABASES['default']['HOST']
         port = settings.DATABASES['default']['PORT']
-        conn_string = f'postgresql://{user}:{password}@{host}:{port}/{database_name}'
-        engine = create_engine(conn_string, echo=False)
 
+        conn = None
+        try:
+            conn = psycopg2.connect(host=host,
+                                    port=port,
+                                    database=database_name,
+                                    user=user,
+                                    password=password
+                                    )
+            cursor = conn.cursor()
+            # run a single query that is part of the query array
+            cursor.execute(query)
+            # close communication with the PostgreSQL database server
+            cursor.close()
+            # commit the changes
+            conn.commit()
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(error)
+        finally:
+            if conn is not None:
+                conn.close()
+
+    def process_pandas_to_sql(self):
+        """
+        Function to convert Pandas DataFrame to Postgres DB by authenticating using information in .env and using Pandas.sql method
+        """
+        param = (AsIs('STARS'), AsIs(settings.DATABASES['default']['USER']))
+        initial_query = f"""CREATE SCHEMA IF NOT EXISTS {param[0]} AUTHORIZATION {param[1]};"""
+        queries = [initial_query]
+
+        schema_name = str(param[0]).lower()
+    
         if self.pipeline == "a":
             self.prep_df_andrew()
+            insert_query_execute_val = f"""insert into stars.AndrewData._meta.db_table(
+                PS1_ID,
+                MJD,
+                Mag_ZTF,
+                Mag_err,
+                Flux,
+                Flux_err,
+                g_PS1,
+                r_PS1,
+                i_PS1,
+                Stargal,
+                ) values %s """
             self.dataframe.to_sql(AndrewData._meta.db_table,
                                   con=engine, if_exists='replace')
         elif self.pipeline == "m":
@@ -89,4 +138,8 @@ class DataIngestion(BaseCommand):
             raise Exception(
                 "The input is not a product of a valid photometry pipeline")
 
-        return self.dataframe
+        # Parallelize the processes so that queries executie quicker
+        N_CPU = 3
+        pool = multiprocessing.Pool(N_CPU)
+        for _ in pool.imap_unordered(self.runQuery, queries):
+            continue
