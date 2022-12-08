@@ -47,10 +47,6 @@ class DataRetrieval:
                 del datContent[content_i]
         # remove the unnecessary commas in header row
         header_row = [param.replace(',', '') for param in datContent[0]]
-
-        # Parse PS1_ID to get unique identifier
-        _, PS1_ID, ccd, quad = os.path.basename(self.rel_filepath)[:-4].split("_")
-        uniq_id = f"{PS1_ID}+{ccd}+{quad}"
         
         datContent = datContent[1:]
         return pd.DataFrame(datContent, columns=header_row)

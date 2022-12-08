@@ -41,11 +41,23 @@ class DataIngestion(BaseCommand):
         A function to prepare the dataframe for Mrozpipe before converting to PostgresDB 
         """
 
+        # Parse PS1_ID to get unique identifier
+        _, PS1_ID, ccd, quad = os.path.basename(
+            self.rel_filepath)[:-4].split("_")
+        uniq_id = f"{PS1_ID}+{ccd}+{quad}"
+        return uniq_id
+
     def prep_df_ztffps(self):
         """"
         A function to prepare the dataframe for ztffps before converting to PostgresDB 
         """
-        self.dataframe = self.dataframe.drop(columns=['index'])
+        self.dataframe.drop('index', axis=1, inplace=True)
+
+        # Parse PS1_ID to get unique identifier
+        _, PS1_ID, ccd, quad = os.path.basename(
+            self.rel_filepath)[:-4].split("_")
+        uniq_id = f"{PS1_ID}+{ccd}+{quad}"
+        return uniq_id
 
     def process_pandas_to_sql(self):
         """
@@ -66,11 +78,11 @@ class DataIngestion(BaseCommand):
             self.dataframe.to_sql(AndrewData._meta.db_table,
                                   con=engine, if_exists='replace')
         elif self.pipeline == "m":
-            self.prep_df_mroz()
+            uniq_id = self.prep_df_mroz()
             self.dataframe.to_sql(MROZData._meta.db_table,
                                   con=engine, if_exists='replace')
         elif self.pipeline == "z":
-            self.prep_df_ztffps()
+            uniq_id = self.prep_df_ztffps()
             self.dataframe.to_sql(ZTFFPSData._meta.db_table,
                                   con=engine, if_exists='replace')
         else:
