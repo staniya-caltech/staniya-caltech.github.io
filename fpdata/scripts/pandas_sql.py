@@ -10,6 +10,7 @@ from django.core.management.base import BaseCommand
 
 import pandas as pd
 import psycopg2
+from psycopg2 import extras
 from psycopg2.extensions import AsIs
 
 import multiprocessing
@@ -34,6 +35,13 @@ class DataIngestion(BaseCommand):
         assert (isinstance(self.dataframe, pd.DataFrame))
         self.dataframe = self.dataframe.replace('null', np.nan, regex=True)
 
+        # establish connection to PostgreSQL by reading fields from Django settings
+        self.user = settings.DATABASES['default']['USER']
+        self.password = settings.DATABASES['default']['PASSWORD']
+        self.database_name = settings.DATABASES['default']['NAME']
+        self.host = settings.DATABASES['default']['HOST']
+        self.port = settings.DATABASES['default']['PORT']
+
     def prep_df_andrew(self):
         """"
         A function to prepare the dataframe for Andrew before converting to PostgresDB 
@@ -48,9 +56,6 @@ class DataIngestion(BaseCommand):
         _, PS1_ID, ccd, quad = os.path.basename(
             self.rel_filepath)[:-4].split("_")
         uniq_id = f"{PS1_ID}+{ccd}+{quad}"
-        # magnitude = calibration from reference image
-        # There's a column in the output --> magnitude of the nearest source detected in the reference images
-        
         return uniq_id
 
     def prep_df_ztffps(self):
@@ -59,33 +64,23 @@ class DataIngestion(BaseCommand):
         """
         self.dataframe.drop('index', axis=1, inplace=True)
 
-        # To get the magnitude, do not sum the forcediffumflux + nearest magnitude
-        # Look at the documentation to understand how to get the magnitude for difference images
-
         # Parse PS1_ID to get unique identifier
         _, PS1_ID, ccd, quad = os.path.basename(
             self.rel_filepath)[:-4].split("_")
         uniq_id = f"{PS1_ID}+{ccd}+{quad}"
         return uniq_id
 
-    def runQuery(self, query):
+    def executeQuery(self, query):
         """
         Function to run a query in PostgreSQL
         """
-        # establish connection to PostgreSQL by reading fields from Django settings
-        user = settings.DATABASES['default']['USER']
-        password = settings.DATABASES['default']['PASSWORD']
-        database_name = settings.DATABASES['default']['NAME']
-        host = settings.DATABASES['default']['HOST']
-        port = settings.DATABASES['default']['PORT']
-
         conn = None
         try:
-            conn = psycopg2.connect(host=host,
-                                    port=port,
-                                    database=database_name,
-                                    user=user,
-                                    password=password
+            conn = psycopg2.connect(host=self.host,
+                                    port=self.port,
+                                    database=self.database_name,
+                                    user=self.user,
+                                    password=self.password
                                     )
             cursor = conn.cursor()
             # run a single query that is part of the query array
@@ -100,40 +95,60 @@ class DataIngestion(BaseCommand):
             if conn is not None:
                 conn.close()
 
+    def postgresqlInsertQuery(self, sql_command):
+        """
+        Function to append pandas data to postgresql 
+        """
+        conn = None
+        try:
+            conn = psycopg2.connect(host=self.host,
+                                    port=self.port,
+                                    database=self.database_name,
+                                    user=self.user,
+                                    password=self.password
+                                    )
+            cursor = conn.cursor()
+            # run a single query that is part of the query array
+            extras.execute_values(
+                cur=cursor, sql=sql_command, argslist=self.dataframe.values)
+            # close communication with the PostgreSQL database server
+            cursor.close()
+            # commit the changes
+            conn.commit()
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(error)
+        finally:
+            if conn is not None:
+                conn.close()
+
     def process_pandas_to_sql(self):
         """
         Function to convert Pandas DataFrame to Postgres DB by authenticating using information in .env and using Pandas.sql method
         """
-        param = (AsIs('STARS'), AsIs(settings.DATABASES['default']['USER']))
+        schema_name = 'STARS'
+        param = (AsIs(schema_name), AsIs(
+            settings.DATABASES['default']['USER']))
         initial_query = f"""CREATE SCHEMA IF NOT EXISTS {param[0]} AUTHORIZATION {param[1]};"""
-        queries = [initial_query]
+        self.executeQuery(initial_query)
 
-        schema_name = str(param[0]).lower()
-    
+        queries = []
+
         if self.pipeline == "a":
             self.prep_df_andrew()
-            insert_query_execute_val = f"""insert into stars.AndrewData._meta.db_table(
-                PS1_ID,
-                MJD,
-                Mag_ZTF,
-                Mag_err,
-                Flux,
-                Flux_err,
-                g_PS1,
-                r_PS1,
-                i_PS1,
-                Stargal,
-                ) values %s """
-            self.dataframe.to_sql(AndrewData._meta.db_table,
-                                  con=engine, if_exists='replace')
+            table_name = AndrewData._meta.db_table
+            insert_query_execute_val = f"""insert into {schema_name + '.' + table_name}(
+                PS1_ID, MJD, Mag_ZTF, Mag_err, Flux, Flux_err, g_PS1, r_PS1, i_PS1, Stargal) values %s """
+            queries.append(insert_query_execute_val)
         elif self.pipeline == "m":
             uniq_id = self.prep_df_mroz()
-            self.dataframe.to_sql(MROZData._meta.db_table,
-                                  con=engine, if_exists='replace')
+            insert_query_execute_val = f"""insert into {schema_name + '.' + uniq_id}(
+                index, field, ccdid, qid, filter, pid, infobitssci, sciinpseeing, scibckgnd, scisigpix, zpmaginpsci, zpmaginpsciunc, zpmaginpscirms, clrcoeff, clrcoeffunc, ncalmatches, exptime, adpctdif1, adpctdif2, diffmaglim, zpdiff, programid, jd, rfid, forcediffimflux, forcediffimfluxunc, forcediffimsnr, forcediffimchisq, forcediffimfluxap, forcediffimfluxuncap, forcediffimsnrap, aperturecorr, dnearestrefsrc, nearestrefmag, nearestrefmagunc, nearestrefchi, nearestrefsharp, refjdstart, refjdend, procstatus) values %s """
+            queries.append(insert_query_execute_val)
         elif self.pipeline == "z":
             uniq_id = self.prep_df_ztffps()
-            self.dataframe.to_sql(ZTFFPSData._meta.db_table,
-                                  con=engine, if_exists='replace')
+            insert_query_execute_val = f"""insert into {schema_name + '.' + uniq_id}(
+                bjd, mag, magerr, diffimflux, diffimfluxunc, flag, filterid, exptime, pid, field, ccd, quad, status, infobits, seeing, zpmagsci, zpmagsciunc, zpmagscirms, clrcoeff, clrcoeffunc, maglim, airmass, nps1matches) values %s """
+            queries.append(insert_query_execute_val)
         else:
             raise Exception(
                 "The input is not a product of a valid photometry pipeline")
@@ -141,5 +156,5 @@ class DataIngestion(BaseCommand):
         # Parallelize the processes so that queries executie quicker
         N_CPU = 3
         pool = multiprocessing.Pool(N_CPU)
-        for _ in pool.imap_unordered(self.runQuery, queries):
+        for _ in pool.imap_unordered(self.postgresqlInsertQuery, queries):
             continue
