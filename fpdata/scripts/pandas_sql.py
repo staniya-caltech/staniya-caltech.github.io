@@ -136,17 +136,16 @@ class DataIngestion(BaseCommand):
         if self.pipeline == "a":
             self.prep_df_andrew()
             table_name = AndrewData._meta.db_table
-            insert_query_execute_val = f"""insert into {schema_name + '.' + table_name}(
-                PS1_ID, MJD, Mag_ZTF, Mag_err, Flux, Flux_err, g_PS1, r_PS1, i_PS1, Stargal) values %s """
-            queries.append(insert_query_execute_val)
+            insert_query_execute_val = f"""INSERT INTO {AsIs(schema_name)}.{AsIs(table_name)}(PS1_ID, MJD, Mag_ZTF, Mag_err, Flux, Flux_err, g_PS1, r_PS1, i_PS1, Stargal) values %s """ # type: ignore            
+            queries.append(insert_query_execute_val)     
         elif self.pipeline == "m":
             uniq_id = self.prep_df_mroz()
-            insert_query_execute_val = f"""insert into {schema_name + '.' + uniq_id}(
+            insert_query_execute_val = f"""INSERT INTO {AsIs(schema_name)}.{AsIs(uniq_id)}(
                 index, field, ccdid, qid, filter, pid, infobitssci, sciinpseeing, scibckgnd, scisigpix, zpmaginpsci, zpmaginpsciunc, zpmaginpscirms, clrcoeff, clrcoeffunc, ncalmatches, exptime, adpctdif1, adpctdif2, diffmaglim, zpdiff, programid, jd, rfid, forcediffimflux, forcediffimfluxunc, forcediffimsnr, forcediffimchisq, forcediffimfluxap, forcediffimfluxuncap, forcediffimsnrap, aperturecorr, dnearestrefsrc, nearestrefmag, nearestrefmagunc, nearestrefchi, nearestrefsharp, refjdstart, refjdend, procstatus) values %s """
             queries.append(insert_query_execute_val)
         elif self.pipeline == "z":
             uniq_id = self.prep_df_ztffps()
-            insert_query_execute_val = f"""insert into {schema_name + '.' + uniq_id}(
+            insert_query_execute_val = f"""INSERT INTO {AsIs(schema_name)}.{AsIs(uniq_id)}(
                 bjd, mag, magerr, diffimflux, diffimfluxunc, flag, filterid, exptime, pid, field, ccd, quad, status, infobits, seeing, zpmagsci, zpmagsciunc, zpmagscirms, clrcoeff, clrcoeffunc, maglim, airmass, nps1matches) values %s """
             queries.append(insert_query_execute_val)
         else:
