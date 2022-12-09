@@ -10,10 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
-from collections import OrderedDict
-from dotenv import find_dotenv, dotenv_values
 from pathlib import Path
-import logging
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -24,28 +21,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-dfyx@=+qm5y_mz3g-d)(8z584o=#3@loq*%+aaw=abh$pt8evu'
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = int(os.environ.get("DEBUG", default=0))
 
-ALLOWED_HOSTS = []
-
-
-def populate_args_from_dotenv():
-    """
-    Function to read secret environment variables from .env file
-    """
-    logger = logging.getLogger(__name__)
-    try:
-        dotenv_path = find_dotenv(raise_error_if_not_found=True)
-        logger.info('Found .evn, loading variables')
-        env_dict = dotenv_values(dotenv_path=dotenv_path)
-        return env_dict
-    except IOError:
-        logger.info('Didn\'t find .env')
-        return None
-
+# 'DJANGO_ALLOWED_HOSTS' should be a single string of hosts with a space between each.
+# For example: 'DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]'
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
 
 # Application definition
 
@@ -94,23 +76,14 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-env_dict = populate_args_from_dotenv()
-assert(isinstance(env_dict, OrderedDict))
-if env_dict != None:
-        host= "db"
-        database = "postgres"
-        user = env_dict['POSTGRES_USER']
-        password = env_dict['POSTGRES_PASSWORD']
-else:
-    raise Exception(f"Error: Make sure that .env file is populated with postgresql parameters")
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'postgres',
-        'USER': user,
-        'PASSWORD' : password,
-        'HOST': host,
-        'PORT': 5432,
+        'ENGINE': os.environ.get("POSTGRES_ENGINE", "django.db.backends.postgresql_psycopg2"),
+        'NAME': os.environ.get("DATABASE", "postgres"),
+        'USER': os.environ.get("POSTGRES_USER"),
+        'PASSWORD' :os.environ.get("POSTGRES_PASSWORD"),
+        'HOST': os.environ.get("POSTGRES_HOST", "db"),
+        'PORT': os.environ.get("POSTGRES_PORT", "5432"),
     }
 }
 

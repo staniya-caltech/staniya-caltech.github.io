@@ -12,6 +12,11 @@ services:
       - ./.env.dev
     depends_on:
       - db
+    links:
+      - db:db
+    networks:
+      - postgres
+      - djangonetwork
 
   db:
     container_name: pg_container
@@ -29,6 +34,7 @@ services:
       - "5438:5432"
     networks:
       - postgres
+      - djangonetwork
     volumes:
       - postgres:/data/postgres
     
@@ -39,7 +45,7 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
-      PGADMIN_CONFIG_SERVER_MODE: ${PGADMIN_CONFIG_SERVER_MOD}
+      PGADMIN_CONFIG_SERVER_MODE: "${PGADMIN_CONFIG_SERVER_MOD}"
     volumes:
       - pgadmin:/var/lib/pgadmin
     ports:
@@ -49,6 +55,8 @@ services:
 
 networks:
   postgres:
+    driver: bridge
+  djangonetwork:
     driver: bridge
 
 volumes:

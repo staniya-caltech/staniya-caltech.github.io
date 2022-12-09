@@ -46,16 +46,16 @@ class DataIngestion(BaseCommand):
         """"
         A function to prepare the dataframe for Andrew before converting to PostgresDB 
         """
+        uniq_id = self.dataframe['PS1_ID']
+        return uniq_id
 
     def prep_df_mroz(self):
         """"
         A function to prepare the dataframe for Mrozpipe before converting to PostgresDB 
         """
-
         # Parse PS1_ID to get unique identifier
-        _, PS1_ID, ccd, quad = os.path.basename(
-            self.rel_filepath)[:-4].split("_")
-        uniq_id = f"{PS1_ID}+{ccd}+{quad}"
+        uniq_id = os.path.basename(
+            self.rel_filepath)[:-4].split("_")[1]
         return uniq_id
 
     def prep_df_ztffps(self):
@@ -65,9 +65,10 @@ class DataIngestion(BaseCommand):
         self.dataframe.drop('index', axis=1, inplace=True)
 
         # Parse PS1_ID to get unique identifier
-        _, PS1_ID, ccd, quad = os.path.basename(
-            self.rel_filepath)[:-4].split("_")
-        uniq_id = f"{PS1_ID}+{ccd}+{quad}"
+        # _, PS1_ID, ccd, quad = os.path.basename(
+        #     self.rel_filepath)[:-4].split("_")
+        uniq_id = os.path.basename(
+            self.rel_filepath)[:-4].split("_")[1]
         return uniq_id
 
     def executeQuery(self, query):
@@ -125,27 +126,27 @@ class DataIngestion(BaseCommand):
         """
         Function to convert Pandas DataFrame to Postgres DB by authenticating using information in .env and using Pandas.sql method
         """
-        schema_name = 'STARS'
-        param = (AsIs(schema_name), AsIs(
-            settings.DATABASES['default']['USER']))
-        initial_query = f"""CREATE SCHEMA IF NOT EXISTS {param[0]} AUTHORIZATION {param[1]};"""
-        self.executeQuery(initial_query)
+        # schema_name = 'STARS'
+        # param = (AsIs(schema_name), AsIs(
+        #     settings.DATABASES['default']['USER']))
+        # initial_query = f"""CREATE SCHEMA IF NOT EXISTS {param[0]} AUTHORIZATION {param[1]};"""
+        # self.executeQuery(initial_query)
 
         queries = []
 
         if self.pipeline == "a":
-            self.prep_df_andrew()
-            table_name = AndrewData._meta.db_table
-            insert_query_execute_val = f"""INSERT INTO {AsIs(schema_name)}.{AsIs(table_name)}(PS1_ID, MJD, Mag_ZTF, Mag_err, Flux, Flux_err, g_PS1, r_PS1, i_PS1, Stargal) values %s """ # type: ignore            
+            uniq_id = self.prep_df_andrew()
+            # table_name = AndrewData._meta.db_table
+            insert_query_execute_val = f"""INSERT INTO {AsIs(uniq_id)} IF NOT EXISTS (PS1_ID, MJD, Mag_ZTF, Mag_err, Flux, Flux_err, g_PS1, r_PS1, i_PS1, Stargal) values %s """ # type: ignore            
             queries.append(insert_query_execute_val)     
         elif self.pipeline == "m":
             uniq_id = self.prep_df_mroz()
-            insert_query_execute_val = f"""INSERT INTO {AsIs(schema_name)}.{AsIs(uniq_id)}(
+            insert_query_execute_val = f"""INSERT INTO{AsIs(uniq_id)} IF NOT EXISTS(
                 index, field, ccdid, qid, filter, pid, infobitssci, sciinpseeing, scibckgnd, scisigpix, zpmaginpsci, zpmaginpsciunc, zpmaginpscirms, clrcoeff, clrcoeffunc, ncalmatches, exptime, adpctdif1, adpctdif2, diffmaglim, zpdiff, programid, jd, rfid, forcediffimflux, forcediffimfluxunc, forcediffimsnr, forcediffimchisq, forcediffimfluxap, forcediffimfluxuncap, forcediffimsnrap, aperturecorr, dnearestrefsrc, nearestrefmag, nearestrefmagunc, nearestrefchi, nearestrefsharp, refjdstart, refjdend, procstatus) values %s """
             queries.append(insert_query_execute_val)
         elif self.pipeline == "z":
             uniq_id = self.prep_df_ztffps()
-            insert_query_execute_val = f"""INSERT INTO {AsIs(schema_name)}.{AsIs(uniq_id)}(
+            insert_query_execute_val = f"""INSERT INTO {AsIs(uniq_id)} IF NOT EXISTS (
                 bjd, mag, magerr, diffimflux, diffimfluxunc, flag, filterid, exptime, pid, field, ccd, quad, status, infobits, seeing, zpmagsci, zpmagsciunc, zpmagscirms, clrcoeff, clrcoeffunc, maglim, airmass, nps1matches) values %s """
             queries.append(insert_query_execute_val)
         else:

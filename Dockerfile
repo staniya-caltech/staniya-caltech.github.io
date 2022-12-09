@@ -17,6 +17,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
 # install dependencies
 RUN pip install --upgrade cython
 RUN pip install --upgrade pip
+
 COPY ./Pipfile Pipfile.lock /usr/src/app/
 COPY ./requirements.txt .
 RUN pip install -r requirements.txt
