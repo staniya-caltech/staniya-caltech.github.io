@@ -79,9 +79,9 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': os.environ.get("POSTGRES_ENGINE", "django.db.backends.postgresql_psycopg2"),
-        'NAME': os.environ.get("DATABASE", "postgres"),
-        'USER': os.environ.get("POSTGRES_USER"),
-        'PASSWORD' :os.environ.get("POSTGRES_PASSWORD"),
+        'NAME': os.environ.get("DATABASE", "stars"),
+        'USER': os.environ.get("POSTGRES_USER", "postgres"),
+        'PASSWORD' :os.environ.get("POSTGRES_PASSWORD", "postgres"),
         'HOST': os.environ.get("POSTGRES_HOST", "db"),
         'PORT': os.environ.get("POSTGRES_PORT", "5432"),
     }
