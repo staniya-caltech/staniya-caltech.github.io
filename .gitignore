@@ -25,6 +25,7 @@ pyenv
 .idea
 *.iml
 
+env_files/
 .env*
 data
 
@@ -55,6 +56,9 @@ var/
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
+
+# IDE byproducts
+.vscode
 
 # Unit test / coverage reports
 .tox/

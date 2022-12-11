@@ -169,6 +169,44 @@
                     </tbody>
                     {% endif %}
             </table>
+            <table class="table">
+                {% if andrew %}
+                <h4 class="text-center"><u>ANDREW</u></h2><br>
+                    <thead>
+                        <tr>
+                            <th>PS1_ID</th>
+                            <th>MJD</th>
+                            <th>Mag_ZTF</th>
+                            <th>Mag_err</th>
+                            <th>Flux</th>
+                            <th>Flux_err</th>
+                            <th>g_PS1</th>
+                            <th>r_PS1</th>
+                            <th>i_PS1</th>
+                            <th>Stargal</th>
+                            <th>infobits</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- jinja2 Technique -->
+                        {% for k in andrew %}
+                        <tr>
+                            <td>{{k.PS1_ID}}</td>
+                            <td>{{k.MJD}}</td>
+                            <td>{{k.Mag_ZTF}}</td>
+                            <td>{{k.Mag_err}}</td>
+                            <td>{{k.Flux}}</td>
+                            <td>{{k.Flux_err}}</td>
+                            <td>{{k.g_PS1}}</td>
+                            <td>{{k.r_PS1}}</td>
+                            <td>{{k.i_PS1}}</td>
+                            <td>{{k.Stargal}}</td>
+                            <td>{{k.infobits}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    {% endif %}
+            </table>
         </div>
     </div>
 </body>

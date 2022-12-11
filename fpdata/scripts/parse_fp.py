@@ -47,5 +47,6 @@ class DataRetrieval:
                 del datContent[content_i]
         # remove the unnecessary commas in header row
         header_row = [param.replace(',', '') for param in datContent[0]]
+        
         datContent = datContent[1:]
         return pd.DataFrame(datContent, columns=header_row)
