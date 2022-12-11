@@ -1,3 +1,11 @@
+-- strategy for loading data --> unlogged data without any indices applied
+-- load data afterwards --> cluster data
+-- time constraint --> figuring out the indices for each of the columns
+
+
+-- bulk upload data --> upload data first and do indices afterwards
+-- turn off transaction logging
+
 SET default_tablespace = stars_data_02;
 
     
@@ -14,7 +22,7 @@ CREATE TABLE stars (
 
 ALTER TABLE stars OWNER TO ztfpo;
 
-ALTER TABLE pipeline.stars SET SCHEMA transients;
+ALTER TABLE IF NOT EXISTS pipeline.stars SET SCHEMA transients;
 
 
 SET default_tablespace = stars_indx_04;

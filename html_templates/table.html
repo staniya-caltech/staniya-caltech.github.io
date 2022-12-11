@@ -1,0 +1,214 @@
+### templates/table.html ###
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Table</title>
+</head>
+
+<body>
+    <div class="content">
+        <div class="container">
+            <h2 class="text-center"><u>Forced Photometry Data</u></h2><br>
+            <table class="table">
+                {% if ztffps %}
+                <h4 class="text-center"><u>ZTFFPS</u></h2><br>
+                    <thead>
+                        <tr>
+                            <th>field</th>
+                            <th>ccdid</th>
+                            <th>qid</th>
+                            <th>filter</th>
+                            <th>pid</th>
+                            <th>infobitssci</th>
+                            <th>sciinpseeing</th>
+                            <th>scibckgnd</th>
+                            <th>scisigpix</th>
+                            <th>zpmaginpsci</th>
+                            <th>zpmaginpsciunc</th>
+                            <th>zpmaginpscirms</th>
+                            <th>clrcoeff</th>
+                            <th>clrcoeffunc</th>
+                            <th>ncalmatches</th>
+                            <th>exptime</th>
+                            <th>adpctdif1</th>
+                            <th>adpctdif2</th>
+                            <th>diffmaglim</th>
+                            <th>zpdiff</th>
+                            <th>programid</th>
+                            <th>jd</th>
+                            <th>rfid</th>
+                            <th>forcediffimflux</th>
+                            <th>forcediffimfluxunc</th>
+                            <th>forcediffimsnr</th>
+                            <th>forcediffimchisq</th>
+                            <th>forcediffimfluxap</th>
+                            <th>forcediffimfluxuncap</th>
+                            <th>forcediffimsnrap</th>
+                            <th>aperturecorr</th>
+                            <th>dnearestrefsrc</th>
+                            <th>nearestrefmag</th>
+                            <th>nearestrefmagunc</th>
+                            <th>nearestrefchi</th>
+                            <th>nearestrefsharp</th>
+                            <th>refjdstart</th>
+                            <th>refjdend</th>
+                            <th>procstatus</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- jinja2 Technique -->
+
+                        {% for i in ztffps %}
+                        <tr>
+                            <td>{{i.field}}</td>
+                            <td>{{i.ccdid}}</td>
+                            <td>{{i.qid}}</td>
+                            <td>{{i.filter}}</td>
+                            <td>{{i.pid}}</td>
+                            <td>{{i.infobitssci}}</td>
+                            <td>{{i.sciinpseeing}}</td>
+                            <td>{{i.scibckgnd}}</td>
+                            <td>{{i.scisigpix}}</td>
+                            <td>{{i.zpmaginpsci}}</td>
+                            <td>{{i.zpmaginpsciunc}}</td>
+                            <td>{{i.zpmaginpscirms}}</td>
+                            <td>{{i.clrcoeff}}</td>
+                            <td>{{i.clrcoeffunc}}</td>
+                            <td>{{i.ncalmatches}}</td>
+                            <td>{{i.exptime}}</td>
+                            <td>{{i.adpctdif1}}</td>
+                            <td>{{i.adpctdif2}}</td>
+                            <td>{{i.diffmaglim}}</td>
+                            <td>{{i.zpdiff}}</td>
+                            <td>{{i.programid}}</td>
+                            <td>{{i.jd}}</td>
+                            <td>{{i.rfid}}</td>
+                            <td>{{i.forcediffimflux}}</td>
+                            <td>{{i.forcediffimfluxunc}}</td>
+                            <td>{{i.forcediffimsnr}}</td>
+                            <td>{{i.forcediffimchisq}}</td>
+                            <td>{{i.forcediffimfluxap}}</td>
+                            <td>{{i.forcediffimfluxuncap}}</td>
+                            <td>{{i.forcediffimsnrap}}</td>
+                            <td>{{i.aperturecorr}}</td>
+                            <td>{{i.dnearestrefsrc}}</td>
+                            <td>{{i.nearestrefmag}}</td>
+                            <td>{{i.nearestrefmagunc}}</td>
+                            <td>{{i.nearestrefchi}}</td>
+                            <td>{{i.nearestrefsharp}}</td>
+                            <td>{{i.refjdstart}}</td>
+                            <td>{{i.refjdend}}</td>
+                            <td>{{i.procstatus}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    {% endif %}
+            </table>
+            <table class="table">
+                {% if mroz %}
+                <h4 class="text-center"><u>MROZ</u></h2><br>
+                    <thead>
+                        <tr>
+                            <th>bjd</th>
+                            <th>mag</th>
+                            <th>magerr</th>
+                            <th>diffimflux</th>
+                            <th>diffimfluxunc</th>
+                            <th>flag</th>
+                            <th>filterid</th>
+                            <th>exptime</th>
+                            <th>pid</th>
+                            <th>field</th>
+                            <th>ccd</th>
+                            <th>quad</th>
+                            <th>status</th>
+                            <th>infobits</th>
+                            <th>seeing</th>
+                            <th>zpmagsci</th>
+                            <th>zpmagsciunc</th>
+                            <th>zpmagscirms</th>
+                            <th>clrcoeff</th>
+                            <th>clrcoeffunc</th>
+                            <th>maglim</th>
+                            <th>airmass</th>
+                            <th>nps1matches</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- jinja2 Technique -->
+
+                        {% for j in mroz %}
+                        <tr>
+                            <td>{{j.bjd}}</td>
+                            <td>{{j.mag}}</td>
+                            <td>{{j.magerr}}</td>
+                            <td>{{j.diffimflux}}</td>
+                            <td>{{j.diffimfluxunc}}</td>
+                            <td>{{j.flag}}</td>
+                            <td>{{j.filterid}}</td>
+                            <td>{{j.exptime}}</td>
+                            <td>{{j.pid}}</td>
+                            <td>{{j.field}}</td>
+                            <td>{{j.ccd}}</td>
+                            <td>{{j.quad}}</td>
+                            <td>{{j.status}}</td>
+                            <td>{{j.infobits}}</td>
+                            <td>{{j.seeing}}</td>
+                            <td>{{j.zpmagsci}}</td>
+                            <td>{{j.zpmagsciunc}}</td>
+                            <td>{{j.zpmagscirms}}</td>
+                            <td>{{j.clrcoeff}}</td>
+                            <td>{{j.clrcoeffunc}}</td>
+                            <td>{{j.maglim}}</td>
+                            <td>{{j.airmass}}</td>
+                            <td>{{j.nps1matches}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    {% endif %}
+            </table>
+            <table class="table">
+                {% if andrew %}
+                <h4 class="text-center"><u>ANDREW</u></h2><br>
+                    <thead>
+                        <tr>
+                            <th>PS1_ID</th>
+                            <th>MJD</th>
+                            <th>Mag_ZTF</th>
+                            <th>Mag_err</th>
+                            <th>Flux</th>
+                            <th>Flux_err</th>
+                            <th>g_PS1</th>
+                            <th>r_PS1</th>
+                            <th>i_PS1</th>
+                            <th>Stargal</th>
+                            <th>infobits</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- jinja2 Technique -->
+                        {% for k in andrew %}
+                        <tr>
+                            <td>{{k.PS1_ID}}</td>
+                            <td>{{k.MJD}}</td>
+                            <td>{{k.Mag_ZTF}}</td>
+                            <td>{{k.Mag_err}}</td>
+                            <td>{{k.Flux}}</td>
+                            <td>{{k.Flux_err}}</td>
+                            <td>{{k.g_PS1}}</td>
+                            <td>{{k.r_PS1}}</td>
+                            <td>{{k.i_PS1}}</td>
+                            <td>{{k.Stargal}}</td>
+                            <td>{{k.infobits}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    {% endif %}
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>
