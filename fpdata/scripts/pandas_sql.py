@@ -125,7 +125,7 @@ class DataIngestion(BaseCommand):
             if conn is not None:
                 conn.close()
 
-    def process_pandas_to_sql(self):
+    def process_pandas_to_sql(self, query):
         """
         Function to run a query in PostgreSQL
         """
@@ -134,16 +134,13 @@ class DataIngestion(BaseCommand):
         #     settings.DATABASES['default']['USER']))
         # initial_query = f"""CREATE SCHEMA IF NOT EXISTS {param[0]} AUTHORIZATION {param[1]};"""
         # self.executeQuery(initial_query)
-
-        queries = []
-
         conn = None
         try:
-            conn = psycopg2.connect(host=host,
-                                    port=port,
-                                    database=database_name,
-                                    user=user,
-                                    password=password
+            conn = psycopg2.connect(host=self.host,
+                                    port=self.port,
+                                    database=self.database_name,
+                                    user=self.user,
+                                    password=self.password
                                     )
             cursor = conn.cursor()
             # run a single query that is part of the query array
