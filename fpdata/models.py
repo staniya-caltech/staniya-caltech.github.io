@@ -1,8 +1,8 @@
-### data/models.py ###
 from uuid import uuid4
 from django.db import models
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
+
 # Create your models here.
 
 
@@ -49,6 +49,7 @@ class ZTFFPSData(models.Model):
     refjdend = JD of latest sci image used for ref image [days]
     procstatus = Per-epoch processing status codes (0 => no warnings); if non-zero, see accompanying log file and document link below
     """
+
     index = models.IntegerField(primary_key=True)
     field = models.IntegerField()
     ccdid = models.IntegerField()
@@ -56,77 +57,52 @@ class ZTFFPSData(models.Model):
     filter = models.CharField(max_length=5)
     pid = models.BigIntegerField(null=True)
     infobitssci = models.IntegerField(null=True)
-    sciinpseeing = models.DecimalField(
-        max_digits=100,   decimal_places=15, null=True)
-    scibckgnd = models.DecimalField(
-        max_digits=100,   decimal_places=15, null=True)
-    scisigpix = models.DecimalField(
-        max_digits=100,   decimal_places=15, null=True)
-    zpmaginpsci = models.DecimalField(
-        max_digits=100,   decimal_places=15, null=True)
-    zpmaginpsciunc = models.DecimalField(
-        max_digits=100,   decimal_places=15, null=True)
-    zpmaginpscirms = models.DecimalField(
-        max_digits=100,   decimal_places=15, null=True)
-    clrcoeff = models.DecimalField(
-        max_digits=100,   decimal_places=15, null=True)
-    clrcoeffunc = models.DecimalField(
-        max_digits=100,   decimal_places=15, null=True)
+    sciinpseeing = models.DecimalField(max_digits=100, decimal_places=15, null=True)
+    scibckgnd = models.DecimalField(max_digits=100, decimal_places=15, null=True)
+    scisigpix = models.DecimalField(max_digits=100, decimal_places=15, null=True)
+    zpmaginpsci = models.DecimalField(max_digits=100, decimal_places=15, null=True)
+    zpmaginpsciunc = models.DecimalField(max_digits=100, decimal_places=15, null=True)
+    zpmaginpscirms = models.DecimalField(max_digits=100, decimal_places=15, null=True)
+    clrcoeff = models.DecimalField(max_digits=100, decimal_places=15, null=True)
+    clrcoeffunc = models.DecimalField(max_digits=100, decimal_places=15, null=True)
     ncalmatches = models.IntegerField(null=True)
-    exptime = models.DecimalField(
-        max_digits=100, decimal_places=15, null=True)
-    adpctdif1 = models.DecimalField(
-        max_digits=100, decimal_places=15, null=True)
-    adpctdif2 = models.DecimalField(
-        max_digits=100, decimal_places=15, null=True)
-    diffmaglim = models.DecimalField(
-        max_digits=100, decimal_places=15, null=True)
-    zpdiff = models.DecimalField(
-        max_digits=100, decimal_places=15, null=True)
+    exptime = models.DecimalField(max_digits=100, decimal_places=15, null=True)
+    adpctdif1 = models.DecimalField(max_digits=100, decimal_places=15, null=True)
+    adpctdif2 = models.DecimalField(max_digits=100, decimal_places=15, null=True)
+    diffmaglim = models.DecimalField(max_digits=100, decimal_places=15, null=True)
+    zpdiff = models.DecimalField(max_digits=100, decimal_places=15, null=True)
     programid = models.IntegerField(null=True)
-    jd = models.DecimalField(
-        max_digits=100, decimal_places=15, null=True)
-    rfid = models.DecimalField(
-        max_digits=100, decimal_places=15, null=True)
-    forcediffimflux = models.DecimalField(
-        max_digits=100, decimal_places=15, null=True)
+    jd = models.DecimalField(max_digits=100, decimal_places=15, null=True)
+    rfid = models.DecimalField(max_digits=100, decimal_places=15, null=True)
+    forcediffimflux = models.DecimalField(max_digits=100, decimal_places=15, null=True)
     forcediffimfluxunc = models.DecimalField(
-        max_digits=100, decimal_places=15, null=True)
-    forcediffimsnr = models.DecimalField(
-        max_digits=100, decimal_places=15, null=True)
-    forcediffimchisq = models.DecimalField(
-        max_digits=100, decimal_places=15, null=True)
+        max_digits=100, decimal_places=15, null=True
+    )
+    forcediffimsnr = models.DecimalField(max_digits=100, decimal_places=15, null=True)
+    forcediffimchisq = models.DecimalField(max_digits=100, decimal_places=15, null=True)
     forcediffimfluxap = models.DecimalField(
-        max_digits=100, decimal_places=15, null=True)
+        max_digits=100, decimal_places=15, null=True
+    )
     forcediffimfluxuncap = models.DecimalField(
-        max_digits=100, decimal_places=15, null=True)
-    forcediffimsnrap = models.DecimalField(
-        max_digits=100, decimal_places=15, null=True)
-    aperturecorr = models.DecimalField(
-        max_digits=100, decimal_places=15, null=True)
-    dnearestrefsrc = models.DecimalField(
-        max_digits=100, decimal_places=15, null=True)
-    nearestrefmag = models.DecimalField(
-        max_digits=100, decimal_places=15, null=True)
-    nearestrefmagunc = models.DecimalField(
-        max_digits=100, decimal_places=15, null=True)
-    nearestrefmagunc = models.DecimalField(
-        max_digits=100, decimal_places=15, null=True)
-    nearestrefchi = models.DecimalField(
-        max_digits=100, decimal_places=15, null=True)
-    nearestrefsharp = models.DecimalField(
-        max_digits=100, decimal_places=15, null=True)
-    refjdstart = models.DecimalField(
-        max_digits=100, decimal_places=15, null=True)
-    refjdend = models.DecimalField(
-        max_digits=100, decimal_places=15, null=True)
+        max_digits=100, decimal_places=15, null=True
+    )
+    forcediffimsnrap = models.DecimalField(max_digits=100, decimal_places=15, null=True)
+    aperturecorr = models.DecimalField(max_digits=100, decimal_places=15, null=True)
+    dnearestrefsrc = models.DecimalField(max_digits=100, decimal_places=15, null=True)
+    nearestrefmag = models.DecimalField(max_digits=100, decimal_places=15, null=True)
+    nearestrefmagunc = models.DecimalField(max_digits=100, decimal_places=15, null=True)
+    nearestrefmagunc = models.DecimalField(max_digits=100, decimal_places=15, null=True)
+    nearestrefchi = models.DecimalField(max_digits=100, decimal_places=15, null=True)
+    nearestrefsharp = models.DecimalField(max_digits=100, decimal_places=15, null=True)
+    refjdstart = models.DecimalField(max_digits=100, decimal_places=15, null=True)
+    refjdend = models.DecimalField(max_digits=100, decimal_places=15, null=True)
     procstatus = models.CharField(max_length=100, null=True)
 
     def __str__(self):
         return str(self.index)
 
     class Meta:
-        ordering = [models.F('jd').desc(nulls_last=True)]
+        ordering = [models.F("jd").desc(nulls_last=True)]
 
 
 class MROZData(models.Model):
@@ -155,58 +131,42 @@ class MROZData(models.Model):
     airmass = Airmass of science image
     nps1matches = Number of PS1 calibrators used in initial calibration of sci image
     """
+
     index = models.IntegerField(primary_key=True)
-    bjd = models.DecimalField(
-        max_digits=100, decimal_places=10, null=True)
-    mag = models.DecimalField(
-        max_digits=100, decimal_places=5, null=True)
-    magerr = models.DecimalField(
-        max_digits=20, decimal_places=15, null=True)
-    diffimflux = models.DecimalField(
-        max_digits=100, decimal_places=5, null=True)
-    diffimfluxunc = models.DecimalField(
-        max_digits=100, decimal_places=5, null=True)
-    flag = models.IntegerField(
-        validators=[MaxValueValidator(1), MinValueValidator(0)])
+    bjd = models.DecimalField(max_digits=100, decimal_places=10, null=True)
+    mag = models.DecimalField(max_digits=100, decimal_places=5, null=True)
+    magerr = models.DecimalField(max_digits=20, decimal_places=15, null=True)
+    diffimflux = models.DecimalField(max_digits=100, decimal_places=5, null=True)
+    diffimfluxunc = models.DecimalField(max_digits=100, decimal_places=5, null=True)
+    flag = models.IntegerField(validators=[MaxValueValidator(1), MinValueValidator(0)])
     filterid = models.IntegerField(
-        validators=[MaxValueValidator(3), MinValueValidator(1)])
+        validators=[MaxValueValidator(3), MinValueValidator(1)]
+    )
     # TODO: change this one to time
     exptime = models.CharField(max_length=100, null=True)
-    pid = models.IntegerField(
-        validators=[MaxValueValidator(3), MinValueValidator(1)])
+    pid = models.IntegerField(validators=[MaxValueValidator(3), MinValueValidator(1)])
     field = models.IntegerField()
-    ccd = models.IntegerField(
-        validators=[MaxValueValidator(16), MinValueValidator(1)])
-    quad = models.IntegerField(
-        validators=[MaxValueValidator(4), MinValueValidator(1)])
+    ccd = models.IntegerField(validators=[MaxValueValidator(16), MinValueValidator(1)])
+    quad = models.IntegerField(validators=[MaxValueValidator(4), MinValueValidator(1)])
     status = models.IntegerField(
-        validators=[MaxValueValidator(1), MinValueValidator(0)])
-    infobits = models.DecimalField(
-        max_digits=100, decimal_places=10)
-    seeing = models.DecimalField(
-        max_digits=100, decimal_places=10, null=True)
-    zpmagsci = models.DecimalField(
-        max_digits=101, decimal_places=100, null=True)
-    zpmagsciunc = models.DecimalField(
-        max_digits=101, decimal_places=100, null=True)
-    zpmagscirms = models.DecimalField(
-        max_digits=101, decimal_places=100, null=True)
-    clrcoeff = models.DecimalField(
-        max_digits=101, decimal_places=100, null=True)
-    clrcoeffunc = models.DecimalField(
-        max_digits=101, decimal_places=100, null=True)
-    maglim = models.DecimalField(
-        max_digits=100, decimal_places=10, null=True)
-    airmass = models.DecimalField(
-        max_digits=100, decimal_places=10, null=True)
+        validators=[MaxValueValidator(1), MinValueValidator(0)]
+    )
+    infobits = models.DecimalField(max_digits=100, decimal_places=10)
+    seeing = models.DecimalField(max_digits=100, decimal_places=10, null=True)
+    zpmagsci = models.DecimalField(max_digits=101, decimal_places=100, null=True)
+    zpmagsciunc = models.DecimalField(max_digits=101, decimal_places=100, null=True)
+    zpmagscirms = models.DecimalField(max_digits=101, decimal_places=100, null=True)
+    clrcoeff = models.DecimalField(max_digits=101, decimal_places=100, null=True)
+    clrcoeffunc = models.DecimalField(max_digits=101, decimal_places=100, null=True)
+    maglim = models.DecimalField(max_digits=100, decimal_places=10, null=True)
+    airmass = models.DecimalField(max_digits=100, decimal_places=10, null=True)
     nps1matches = models.IntegerField(null=True)
 
     def __str__(self):
         return str(self.index)
-    
-    class Meta:
-        ordering = [models.F('bjd').desc(nulls_last=True)]
 
+    class Meta:
+        ordering = [models.F("bjd").desc(nulls_last=True)]
 
 
 class AndrewData(models.Model):
@@ -217,41 +177,37 @@ class AndrewData(models.Model):
     Mag_err = Uncertainty on source magnitude [mag]
     Flux = Absolute flux of object operating on science images [DN]
     Flux_err = flux error [DN]
-    Color Coefficient Magnitudes [DN] = When you measure the flux of an image, you have to obtain a 
-                                        flux so that you can prepare a magnitude of the other systems. 
-                                        You measure the raw flux of the image and you measure the magnitude 
-                                        of reference/ std. stars (established from other surveys). 
-                                        Calibrate other surveys to match the std. stars to survey values 
-        g_PS1 
+    Color Coefficient Magnitudes [DN] = When you measure the flux of an image, you have to obtain a
+                                        flux so that you can prepare a magnitude of the other systems.
+                                        You measure the raw flux of the image and you measure the magnitude
+                                        of reference/ std. stars (established from other surveys).
+                                        Calibrate other surveys to match the std. stars to survey values
+        g_PS1
         r_PS1
         i_PS1
-    Stargal = Stargal is unique to the science image case --> fitting a point-spread function to every image. 
-              Ideal PSF is a two-dimensional Gaussian, but in reality, the true PSF is going to be distorted. 
-              The elongation allows you to map the system based on it's width and height to fit the object. 
+    Stargal = Stargal is unique to the science image case --> fitting a point-spread function to every image.
+              Ideal PSF is a two-dimensional Gaussian, but in reality, the true PSF is going to be distorted.
+              The elongation allows you to map the system based on it's width and height to fit the object.
               Thus, stargal represents a probability of whether a source represents a star or a galaxy [DN]
     infobits = processing summary/QA bits for sci image
     """
+
     index = models.IntegerField(primary_key=True)
     PS1_ID = models.BigIntegerField()
-    MJD = models.DecimalField(
-        max_digits=100, decimal_places=10, null=True)
-    Mag_ZTF = models.DecimalField(
-        max_digits=100, decimal_places=5, null=True)
-    Mag_err = models.DecimalField(
-        max_digits=20, decimal_places=15, null=True)
+    MJD = models.DecimalField(max_digits=100, decimal_places=10, null=True)
+    Mag_ZTF = models.DecimalField(max_digits=100, decimal_places=5, null=True)
+    Mag_err = models.DecimalField(max_digits=20, decimal_places=15, null=True)
 
     Flux = models.DecimalField(max_digits=100, decimal_places=10, null=True)
     Flux_err = models.DecimalField(max_digits=100, decimal_places=10, null=True)
     g_PS1 = models.DecimalField(max_digits=100, decimal_places=10, null=True)
     r_PS1 = models.DecimalField(max_digits=100, decimal_places=10, null=True)
     i_PS1 = models.DecimalField(max_digits=100, decimal_places=10, null=True)
-    Stargal = models.DecimalField(
-        max_digits=20, decimal_places=15, null=True)
+    Stargal = models.DecimalField(max_digits=20, decimal_places=15, null=True)
     infobits = models.IntegerField(null=True)
 
     def __str__(self):
-        return str(self.index) 
-    
-    class Meta:
-        ordering = [models.F('MJD').desc(nulls_last=True)]
+        return str(self.index)
 
+    class Meta:
+        ordering = [models.F("MJD").desc(nulls_last=True)]
