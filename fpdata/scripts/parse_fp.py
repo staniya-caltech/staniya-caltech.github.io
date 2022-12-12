@@ -1,6 +1,5 @@
-import os, sys
+import os
 import pandas as pd
-import stat
 
 
 class DataRetrieval:

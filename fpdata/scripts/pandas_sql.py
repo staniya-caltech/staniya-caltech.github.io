@@ -1,11 +1,9 @@
 import numpy as np
 import os
-from fpdata.models import ZTFFPSData, MROZData, AndrewData
 from .parse_fp import DataRetrieval
 
 # Create your views here.
 # Create your models here.
-from django.db import models
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
@@ -128,37 +126,6 @@ class DataIngestion(BaseCommand):
             if conn is not None:
                 conn.close()
 
-    def process_pandas_to_sql(self, query):
-        """
-        Function to run a query in PostgreSQL
-        """
-        # schema_name = 'STARS'
-        # param = (AsIs(schema_name), AsIs(
-        #     settings.DATABASES['default']['USER']))
-        # initial_query = f"""CREATE SCHEMA IF NOT EXISTS {param[0]} AUTHORIZATION {param[1]};"""
-        # self.executeQuery(initial_query)
-        conn = None
-        try:
-            conn = psycopg2.connect(
-                host=self.host,
-                port=self.port,
-                database=self.database_name,
-                user=self.user,
-                password=self.password,
-            )
-            cursor = conn.cursor()
-            # run a single query that is part of the query array
-            cursor.execute(query)
-            # close communication with the PostgreSQL database server
-            cursor.close()
-            # commit the changes
-            conn.commit()
-        except (Exception, psycopg2.DatabaseError) as error:
-            print(error)
-        finally:
-            if conn is not None:
-                conn.close()
-
     def process_pandas_to_sql(self):
         """
         Function to convert Pandas DataFrame to Postgres DB by authenticating using information in .env and using Pandas.sql method
@@ -167,10 +134,8 @@ class DataIngestion(BaseCommand):
         initial_query = (
             f"""CREATE SCHEMA IF NOT EXISTS {param[0]} AUTHORIZATION {param[1]};"""
         )
-        queries = [initial_query]
-
-        schema_name = str(param[0]).lower()
-
+        self.executeQuery(initial_query)
+        queries = []
         if self.pipeline == "a":
             uniq_id = self.prep_df_andrew()
             # table_name = AndrewData._meta.db_table
