@@ -2,8 +2,8 @@
 # BUILDER #
 ###########
 
-# Pull Official Python base image
-FROM python:3.12-bullseye as builder
+# pull official base image
+FROM python:3.9-slim as builder
 
 # set work directory
 WORKDIR /usr/src/app
@@ -13,19 +13,15 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 # install psycopg2 dependencies
-RUN apk update && \
-    apk add --no-cache --virtual build-deps gcc python3-dev musl-dev postgresql-dev && \
-    apk add --no-cache postgresql-dev tzdata && \
-    venv/bin/pip install --no-cache-dir psycopg2-binary gunicorn && \
-    apk del --no-cache build-deps
+RUN apt-get update \
+    && apt-get -y install libpq-dev gcc python3-dev musl-dev\
+    && pip install psycopg2
 
 # lint
 RUN pip install --upgrade pip
 RUN pip install flake8==3.9.2
 COPY . .
-RUN flake8 --ignore=E501,F401 .
-
-COPY ./Pipfile Pipfile.lock /usr/src/app/
+RUN flake8 --ignore=E501,F401 ./fpdata
 
 # install dependencies
 COPY ./requirements.txt .
@@ -36,13 +32,13 @@ RUN pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requir
 #########
 
 # pull official base image
-FROM python:3.12-bullseye
+FROM python:3.9-slim
 
 # create directory for the app user
 RUN mkdir -p /home/app
 
 # create the app user
-RUN addgroup -S app && adduser -S app -G app
+RUN addgroup --system app && adduser --system --group app
 
 # create the appropriate directories
 ENV HOME=/home/app
@@ -51,7 +47,7 @@ RUN mkdir $APP_HOME
 WORKDIR $APP_HOME
 
 # install dependencies
-RUN apk update && apk add libpq
+RUN apt-get update && apt-get install --no-install-recommends
 COPY --from=builder /usr/src/app/wheels /wheels
 COPY --from=builder /usr/src/app/requirements.txt .
 RUN pip install --no-cache /wheels/*
