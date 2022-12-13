@@ -1,6 +1,5 @@
 Django==3.2.16
-numpy==1.23.5
+numpy==1.21.6
 pandas==1.3.5
-python-dotenv==0.21.0
 psycopg2-binary==2.9.5
-SQLAlchemy==1.4.42
+gunicorn==20.1.0
