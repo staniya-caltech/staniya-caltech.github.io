@@ -6,8 +6,15 @@ services:
       context: ./app
       dockerfile: Dockerfile.prod
     command: gunicorn config.wsgi:application --bind 0.0.0.0:8000
+    deploy:
+      resources:
+        limits:
+          cpus: "0.1"
+          memory: 50M
+      restart_policy:
+        condition: on-failure
     volumes:
-      - ./app:/usr/src/app/
+      - static_volume:/home/app/web/staticfiles
     expose:
       - 8000
     env_file:
@@ -22,7 +29,7 @@ services:
   db:
     container_name: pg_container
     image: postgres
-    restart: unless-stopped
+    restart: always
     env_file:
       - ./.env.prod.db
     logging:
@@ -32,14 +39,15 @@ services:
     ports:
       - "5438:5432"
     networks:
-      - postgres
-      - djangonetwork
+      postgres:
+        aliases:
+          - db
     volumes:
       - postgres:/var/lib/postgresql/data/
   pgadmin:
     container_name: pgadmin4_container
     image: dpage/pgadmin4
-    restart: unless-stopped
+    restart: always
     env_file:
       - ./.env.pgadmin
     volumes:
@@ -47,16 +55,23 @@ services:
     ports:
       - "${PGADMIN_PORT:-5050}:80"
     networks:
-      - postgres
+      postgres:
+        aliases:
+          - pgadmin
   nginx:
     build: ./nginx
+    volumes:
+      - static_volume:/home/app/web/staticfiles
     ports:
       - 1337:80
-    restart: always
+    links:
+      - web:web
     depends_on:
       - web
-    volumes_from:
-      - web
+    networks:
+      djangonetwork:
+        aliases:
+          - nginx
 
 networks:
   postgres:
@@ -67,3 +82,4 @@ networks:
 volumes:
   postgres:
   pgadmin:
+  static_volume:
