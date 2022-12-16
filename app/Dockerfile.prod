@@ -11,7 +11,11 @@ WORKDIR /usr/src/app
 # avoid stuck build due to user prompt
 ARG DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install --no-install-recommends -y python3.9 python3.9-dev python3-pip python3-wheel build-essential && \
+RUN apt-get update && \ 
+    apt-get install --no-install-recommends -y python3.9 python3.9-dev python3-pip python3-wheel \
+    build-essential libssl-dev libffi-dev libblas3 libc6 liblapack3 gcc cython3 && \
+    apt-get -y install python3-numpy python3-scipy && \
+    apt install -y netcat && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # set timezone
@@ -23,7 +27,7 @@ RUN apt-get install -yq tzdata && \
 RUN pip3 install --upgrade pip
 RUN pip3 install flake8==3.9.2
 COPY . .
-RUN flake8 --ignore=E501,F401 ./fpdata
+RUN flake8 --ignore=E501,F401 .
 
 # install requirements
 COPY ./requirements.txt .
@@ -46,10 +50,13 @@ ENV HOME=/home/app
 ENV APP_HOME=/home/app/web
 RUN mkdir $APP_HOME
 RUN mkdir $APP_HOME/staticfiles
+RUN mkdir $APP_HOME/mediafiles
 WORKDIR $APP_HOME
 
 # install dependencies
-RUN apt-get update && apt-get install --no-install-recommends -y python3.9 python3-pip && \
+RUN apt-get update && apt-get install --no-install-recommends -y python3.9 python3-pip libssl-dev libffi-dev libblas3 libc6 liblapack3 gcc cython3 && \
+    apt-get -y install python3-numpy python3-scipy && \
+    apt install -y netcat && \
     apt-get clean && rm -rf /var/lib/apt/list
 COPY --from=builder-image /usr/src/app/wheels /wheels
 COPY --from=builder-image /usr/src/app/requirements.txt .

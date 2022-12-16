@@ -12,6 +12,7 @@ WORKDIR /usr/src/app
 ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install --no-install-recommends -y python3.9 python3.9-dev python3-pip python3-wheel build-essential && \
+    apt install -y netcat && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # install requirements
@@ -38,6 +39,7 @@ WORKDIR $APP_HOME
 
 # install dependencies
 RUN apt-get update && apt-get install --no-install-recommends -y python3.9 python3-pip && \
+    apt install -y netcat && \
     apt-get clean && rm -rf /var/lib/apt/list
 COPY --from=builder-image /usr/src/app/wheels /wheels
 COPY --from=builder-image /usr/src/app/requirements.txt .

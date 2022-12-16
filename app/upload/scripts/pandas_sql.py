@@ -6,7 +6,7 @@ from .parse_fp import DataRetrieval
 # Create your models here.
 from django.conf import settings
 from django.core.management.base import BaseCommand
-from fpdata.models import ZTFFPSData, MROZData, AndrewData
+from upload.models import ZTFFPSData, MROZData, AndrewData
 import pandas as pd
 import psycopg2
 from psycopg2 import extras
