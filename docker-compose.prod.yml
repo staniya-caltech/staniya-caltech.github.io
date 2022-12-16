@@ -2,14 +2,22 @@ version: '3'
 
 services:
   web:
-    build: 
-      context: .
+    build:
+      context: ./app
       dockerfile: Dockerfile.prod
-    command: gunicorn fpdata.wsgi:application --bind 0.0.0.0:8000
+    command: gunicorn django_main.wsgi:application --bind 0.0.0.0:8000
+    deploy:
+      resources:
+        limits:
+          cpus: "0.1"
+          memory: 50M
+      restart_policy:
+        condition: on-failure
     volumes:
-      - .:/usr/src/app/
-    ports:
-      - 8000:8000
+      - static_volume:/home/app/web/staticfiles
+      - media_volume:/home/app/web/mediafiles
+    expose:
+      - 8000
     env_file:
       - ./.env.prod
     depends_on:
@@ -22,7 +30,7 @@ services:
   db:
     container_name: pg_container
     image: postgres
-    restart: unless-stopped
+    restart: always
     env_file:
       - ./.env.prod.db
     logging:
@@ -32,15 +40,15 @@ services:
     ports:
       - "5438:5432"
     networks:
-      - postgres
-      - djangonetwork
+      postgres:
+        aliases:
+          - db
     volumes:
       - postgres:/var/lib/postgresql/data/
-
   pgadmin:
     container_name: pgadmin4_container
     image: dpage/pgadmin4
-    restart: unless-stopped
+    restart: always
     env_file:
       - ./.env.pgadmin
     volumes:
@@ -48,7 +56,24 @@ services:
     ports:
       - "${PGADMIN_PORT:-5050}:80"
     networks:
-      - postgres
+      postgres:
+        aliases:
+          - pgadmin
+  nginx:
+    build: ./nginx
+    volumes:
+      - static_volume:/home/app/web/staticfiles
+      - media_volume:/home/app/web/mediafiles
+    ports:
+      - 1337:80
+    links:
+      - web:web
+    depends_on:
+      - web
+    networks:
+      djangonetwork:
+        aliases:
+          - nginx
 
 networks:
   postgres:
@@ -59,3 +84,5 @@ networks:
 volumes:
   postgres:
   pgadmin:
+  static_volume:
+  media_volume:

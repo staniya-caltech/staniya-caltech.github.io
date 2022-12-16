@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.contrib import messages
 
-from fpdata.scripts.pandas_sql import DataIngestion
+from upload.scripts.pandas_sql import DataIngestion
 
 from .models import AndrewData, MROZData, ZTFFPSData
 from django.core.files.storage import FileSystemStorage

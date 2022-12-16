@@ -2,10 +2,10 @@ version: '3'
 
 services:
   web:
-    build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    build: ./app
+    command: python3 manage.py runserver 0.0.0.0:8000
     volumes:
-      - .:/usr/src/app/
+      - ./app:/usr/src/app/
     ports:
       - 8000:8000
     env_file:
@@ -20,9 +20,9 @@ services:
   db:
     container_name: pg_container
     image: postgres
-    restart: unless-stopped
+    restart: always
     env_file:
-      - ./.env
+      - ./.env.dev.db
     logging:
       options:
         max-size: 10m
@@ -30,14 +30,15 @@ services:
     ports:
       - "5438:5432"
     networks:
-      - postgres
-      - djangonetwork
+      postgres:
+        aliases:
+          - db
     volumes:
       - postgres:/var/lib/postgresql/data/
   pgadmin:
     container_name: pgadmin4_container
     image: dpage/pgadmin4
-    restart: unless-stopped
+    restart: always
     env_file:
       - ./.env.pgadmin
     volumes:
@@ -45,7 +46,9 @@ services:
     ports:
       - "${PGADMIN_PORT:-5050}:80"
     networks:
-      - postgres
+      postgres:
+        aliases:
+          - pgadmin
 
 networks:
   postgres:

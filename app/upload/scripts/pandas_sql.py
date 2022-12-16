@@ -6,7 +6,7 @@ from .parse_fp import DataRetrieval
 # Create your models here.
 from django.conf import settings
 from django.core.management.base import BaseCommand
-
+from upload.models import ZTFFPSData, MROZData, AndrewData
 import pandas as pd
 import psycopg2
 from psycopg2 import extras
@@ -137,18 +137,18 @@ class DataIngestion(BaseCommand):
         self.executeQuery(initial_query)
         queries = []
         if self.pipeline == "a":
-            uniq_id = self.prep_df_andrew()
-            # table_name = AndrewData._meta.db_table
-            insert_query_execute_val = f"""INSERT INTO {AsIs(uniq_id)} IF NOT EXISTS (PS1_ID, MJD, Mag_ZTF, Mag_err, Flux, Flux_err, g_PS1, r_PS1, i_PS1, Stargal) values %s """  # type: ignore
+            # uniq_id = self.prep_df_andrew()
+            # TODO: Change table name to uniq_id
+            insert_query_execute_val = f"""INSERT INTO {AsIs(AndrewData._meta.db_table)} IF NOT EXISTS (PS1_ID, MJD, Mag_ZTF, Mag_err, Flux, Flux_err, g_PS1, r_PS1, i_PS1, Stargal) values %s """  # type: ignore
             queries.append(insert_query_execute_val)
         elif self.pipeline == "m":
-            uniq_id = self.prep_df_mroz()
-            insert_query_execute_val = f"""INSERT INTO{AsIs(uniq_id)} IF NOT EXISTS(
+            # uniq_id = self.prep_df_mroz()
+            insert_query_execute_val = f"""INSERT INTO{AsIs(MROZData._meta.db_table)} IF NOT EXISTS(
                 index, field, ccdid, qid, filter, pid, infobitssci, sciinpseeing, scibckgnd, scisigpix, zpmaginpsci, zpmaginpsciunc, zpmaginpscirms, clrcoeff, clrcoeffunc, ncalmatches, exptime, adpctdif1, adpctdif2, diffmaglim, zpdiff, programid, jd, rfid, forcediffimflux, forcediffimfluxunc, forcediffimsnr, forcediffimchisq, forcediffimfluxap, forcediffimfluxuncap, forcediffimsnrap, aperturecorr, dnearestrefsrc, nearestrefmag, nearestrefmagunc, nearestrefchi, nearestrefsharp, refjdstart, refjdend, procstatus) values %s """
             queries.append(insert_query_execute_val)
         elif self.pipeline == "z":
-            uniq_id = self.prep_df_ztffps()
-            insert_query_execute_val = f"""INSERT INTO {AsIs(uniq_id)} IF NOT EXISTS (
+            # uniq_id = self.prep_df_ztffps()
+            insert_query_execute_val = f"""INSERT INTO {AsIs(ZTFFPSData._meta.db_table)} IF NOT EXISTS (
                 bjd, mag, magerr, diffimflux, diffimfluxunc, flag, filterid, exptime, pid, field, ccd, quad, status, infobits, seeing, zpmagsci, zpmagsciunc, zpmagscirms, clrcoeff, clrcoeffunc, maglim, airmass, nps1matches) values %s """
             queries.append(insert_query_execute_val)
         else:

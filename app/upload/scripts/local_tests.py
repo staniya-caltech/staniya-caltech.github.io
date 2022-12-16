@@ -15,7 +15,7 @@
 #             print(other_dataframe.dtypes)
 
 
-from fpdata.scripts.pandas_sql import DataIngestion
+from upload.scripts.pandas_sql import DataIngestion
 
 
 def test_data_ingestion(data_list):
