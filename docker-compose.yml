@@ -3,7 +3,7 @@ version: '3'
 services:
   web:
     build: ./app
-    command: python3 manage.py runserver 0.0.0.0:8000
+    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./app:/usr/src/app/
     ports:
@@ -19,7 +19,7 @@ services:
       - djangonetwork
   db:
     container_name: pg_container
-    image: postgres
+    image: postgres:15-alpine
     restart: always
     env_file:
       - ./.env.dev.db

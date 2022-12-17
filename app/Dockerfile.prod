@@ -2,26 +2,30 @@
 # BUILDER #
 ###########
 
-# using ubuntu LTS version
-FROM ubuntu:20.04 AS builder-image
+# using python official base image
+FROM python:3.11.1-alpine AS builder-image
 
 # set work directory
 WORKDIR /usr/src/app
 
-# avoid stuck build due to user prompt
-ARG DEBIAN_FRONTEND=noninteractive
+# set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
-RUN apt-get update && \ 
-    apt-get install --no-install-recommends -y python3.9 python3.9-dev python3-pip python3-wheel \
-    build-essential libssl-dev libffi-dev libblas3 libc6 liblapack3 gcc cython3 && \
-    apt-get -y install python3-numpy python3-scipy && \
-    apt install -y netcat && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+# install psycopg2 dependencies
+RUN apk update \
+    && apk add --virtual build-deps gcc python3-dev musl-dev \
+    && apk add postgresql-dev gcc python3-dev musl-dev \
+    && apk del build-deps \
+    && apk --no-cache add musl-dev linux-headers g++
 
 # set timezone
-RUN apt-get install -yq tzdata && \
-    ln -fs /usr/share/zoneinfo/America/Los_Angeles /etc/localtime && \
-    dpkg-reconfigure -f noninteractive tzdata
+RUN apk add --update tzdata
+
+# create and activate virtual environment
+# using final folder name to avoid path issues with packages
+RUN python3 -m venv $WORKDIR/venv
+ENV PATH="$WORKDIR/venv/bin:$PATH"
 
 # lint
 RUN pip3 install --upgrade pip
@@ -31,19 +35,20 @@ RUN flake8 --ignore=E501,F401 .
 
 # install requirements
 COPY ./requirements.txt .
-RUN pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requirements.txt
+RUN pip3 wheel --no-cache-dir --no-deps --wheel-dir $WORKDIR/wheels -r requirements.txt
+RUN pip3 install --no-cache $WORKDIR/wheels/*
 
 #########
 # FINAL #
 #########
 
-FROM ubuntu:20.04 AS runner-image
+FROM python:3.11.1-alpine AS runner-image
+
+# create the app user
+RUN addgroup -S app && adduser -S app -G app
 
 # create directory for the app user
 RUN mkdir -p /home/app
-
-# create the app user
-RUN addgroup --system app && adduser --system --group app
 
 # create the appropriate directories
 ENV HOME=/home/app
@@ -53,14 +58,13 @@ RUN mkdir $APP_HOME/staticfiles
 RUN mkdir $APP_HOME/mediafiles
 WORKDIR $APP_HOME
 
+# set timezone
+COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
+ENV TZ=America/Los_Angeles
+
 # install dependencies
-RUN apt-get update && apt-get install --no-install-recommends -y python3.9 python3-pip libssl-dev libffi-dev libblas3 libc6 liblapack3 gcc cython3 && \
-    apt-get -y install python3-numpy python3-scipy && \
-    apt install -y netcat && \
-    apt-get clean && rm -rf /var/lib/apt/list
-COPY --from=builder-image /usr/src/app/wheels /wheels
-COPY --from=builder-image /usr/src/app/requirements.txt .
-RUN pip install --no-cache /wheels/*
+RUN apk update && apk add libpq
+COPY --from=builder-image /usr/src/app/venv $HOME/venv
 
 # copy entrypoint.prod.sh
 COPY ./entrypoint.prod.sh .
@@ -70,14 +74,14 @@ RUN chmod +x  $APP_HOME/entrypoint.prod.sh
 # copy project
 COPY . $APP_HOME
 
-# make sure all messages always reach console
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED=1
-
 # chown all the files to the app user
 RUN chown -R app:app $APP_HOME
 
 # change to the app user
 USER app
+
+# activate virtual environment
+ENV VIRTUAL_ENV=$HOME/venv
+ENV PATH="$HOME/venv/bin:$PATH"
 
 ENTRYPOINT ["/home/app/web/entrypoint.prod.sh"]

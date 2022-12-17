@@ -24,7 +24,7 @@ services:
       - djangonetwork
   db:
     container_name: pg_container
-    image: postgres
+    image: postgres:15-alpine
     restart: "on-failure"
     env_file:
       - ./.env.prod.db

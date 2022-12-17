@@ -1,35 +1,11 @@
-###########
-# BUILDER #
-###########
+# pull official base image
+FROM python:3.11.1-alpine
 
-# using ubuntu LTS version
-FROM ubuntu:20.04 AS builder-image
-
-# set work directory
-WORKDIR /usr/src/app
-
-# avoid stuck build due to user prompt
-ARG DEBIAN_FRONTEND=noninteractive
-
-RUN apt-get update && apt-get install --no-install-recommends -y python3.9 python3.9-dev python3-pip python3-wheel build-essential && \
-    apt install -y netcat && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# install requirements
-COPY ./requirements.txt .
-RUN pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requirements.txt
-
-#########
-# FINAL #
-#########
-
-FROM ubuntu:20.04 AS runner-image
+# create the app user
+RUN addgroup -S app && adduser -S app -G app
 
 # create directory for the app user
 RUN mkdir -p /home/app
-
-# create the app user
-RUN addgroup --system app && adduser --system --group app
 
 # create the appropriate directories
 ENV HOME=/home/app
@@ -37,31 +13,38 @@ ENV APP_HOME=/home/app/web
 RUN mkdir $APP_HOME
 WORKDIR $APP_HOME
 
+# set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# install psycopg2 dependencies
+RUN apk update \
+    && apk add --virtual build-deps gcc python3-dev musl-dev \
+    && apk add postgresql-dev gcc python3-dev musl-dev \
+    && apk del build-deps \
+    && apk --no-cache add musl-dev linux-headers g++
+
+# create and activate virtual environment
+# using final folder name to avoid path issues with packages
+RUN python3 -m venv $HOME/venv
+ENV PATH="$HOME/venv/bin:$PATH"
+
 # install dependencies
-RUN apt-get update && apt-get install --no-install-recommends -y python3.9 python3-pip && \
-    apt install -y netcat && \
-    apt-get clean && rm -rf /var/lib/apt/list
-COPY --from=builder-image /usr/src/app/wheels /wheels
-COPY --from=builder-image /usr/src/app/requirements.txt .
-RUN pip install --no-cache /wheels/*
+RUN pip3 install --upgrade pip
+COPY ./requirements.txt .
+RUN pip3 wheel --no-cache-dir --no-deps --wheel-dir $HOME/wheels -r requirements.txt
+RUN pip3 install --no-cache $HOME/wheels/*
 
 # copy entrypoint.sh
 COPY ./entrypoint.sh .
-RUN sed -i 's/\r$//g'  $APP_HOME/entrypoint.sh
-RUN chmod +x  $APP_HOME/entrypoint.sh
+RUN sed -i 's/\r$//g' $APP_HOME/entrypoint.sh
+RUN chmod +x $APP_HOME/entrypoint.sh
 
 # copy project
 COPY . $APP_HOME
 
-# make sure all messages always reach console
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED=1
+# activate virtual environment
+ENV VIRTUAL_ENV=$APP_HOME/venv
 
-# chown all the files to the app user
-RUN chown -R app:app $APP_HOME
-
-# change to the app user
-USER app
-
-# run entrypoint.prod.sh
-ENTRYPOINT ["/home/app/web/entrypoint.sh"]
+# run entrypoint.sh
+ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
