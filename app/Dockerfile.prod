@@ -19,13 +19,10 @@ RUN apk update \
     && apk del build-deps \
     && apk --no-cache add musl-dev linux-headers g++
 
-# set timezone
-RUN apk add --update tzdata
-
 # create and activate virtual environment
 # using final folder name to avoid path issues with packages
-RUN python3 -m venv $WORKDIR/venv
-ENV PATH="$WORKDIR/venv/bin:$PATH"
+RUN python3 -m venv /usr/src/app/venv
+ENV PATH="/usr/src/app/venv/bin:$PATH"
 
 # lint
 RUN pip3 install --upgrade pip
@@ -35,8 +32,8 @@ RUN flake8 --ignore=E501,F401 .
 
 # install requirements
 COPY ./requirements.txt .
-RUN pip3 wheel --no-cache-dir --no-deps --wheel-dir $WORKDIR/wheels -r requirements.txt
-RUN pip3 install --no-cache $WORKDIR/wheels/*
+RUN pip3 wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requirements.txt
+RUN pip3 install --no-cache /usr/src/app/wheels/*
 
 #########
 # FINAL #
@@ -57,10 +54,6 @@ RUN mkdir $APP_HOME
 RUN mkdir $APP_HOME/staticfiles
 RUN mkdir $APP_HOME/mediafiles
 WORKDIR $APP_HOME
-
-# set timezone
-COPY --from=base /usr/share/zoneinfo /usr/share/zoneinfo
-ENV TZ=America/Los_Angeles
 
 # install dependencies
 RUN apk update && apk add libpq
