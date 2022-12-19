@@ -17,6 +17,7 @@ services:
       - ./.env.prod
     depends_on:
       - db
+    image: django_main
     links:
       - db:db
     networks:
