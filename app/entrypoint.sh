@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [ "$DATABASE" = "stars" ]
+if [ "$DATABASE" = "postgres" ]
 then
     echo "Waiting for postgres..."
 
@@ -11,7 +11,7 @@ then
     echo "PostgreSQL started"
 fi
 
-python3 manage.py flush --no-input
-python3 manage.py migrate
+python manage.py flush --no-input
+python manage.py migrate
 
 exec "$@"
