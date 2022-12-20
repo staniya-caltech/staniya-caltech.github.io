@@ -17,18 +17,18 @@ RUN apk update \
     && apk add --virtual build-deps gcc python3-dev musl-dev \
     && apk add postgresql-dev gcc python3-dev musl-dev \
     && apk del build-deps \
-    && apk --no-cache add musl-dev linux-headers g++
-
-# create and activate virtual environment
-# using final folder name to avoid path issues with packages
-RUN python3 -m venv /usr/src/app/venv
-ENV PATH="/usr/src/app/venv/bin:$PATH"
+    && apk --no-cache add musl-dev linux-headers g++ libstdc++
 
 # lint
 RUN pip3 install --upgrade pip
 RUN pip3 install flake8==3.9.2
 COPY . .
 RUN flake8 --ignore=E501,F401 .
+
+# create and activate virtual environment
+# using final folder name to avoid path issues with packages
+RUN python3 -m venv /usr/src/app/venv
+ENV PATH="/usr/src/app/venv/bin:$PATH"
 
 # install requirements
 COPY ./requirements.txt .

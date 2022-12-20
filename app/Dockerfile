@@ -22,7 +22,7 @@ RUN apk update \
     && apk add --virtual build-deps gcc python3-dev musl-dev \
     && apk add postgresql-dev gcc python3-dev musl-dev \
     && apk del build-deps \
-    && apk --no-cache add musl-dev linux-headers g++
+    && apk --no-cache add musl-dev linux-headers g++ libstdc++
 
 # create and activate virtual environment
 # using final folder name to avoid path issues with packages

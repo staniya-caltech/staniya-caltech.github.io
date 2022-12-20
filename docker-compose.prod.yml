@@ -6,7 +6,7 @@ services:
       context: ./app
       dockerfile: Dockerfile.prod
     command: gunicorn django_main.wsgi:application --bind 0.0.0.0:8000
-    restart: "on-failure"
+    restart: on-failure
     volumes:
       - static_volume:/home/app/web/staticfiles
       - media_volume:/home/app/web/mediafiles
@@ -26,7 +26,7 @@ services:
   db:
     container_name: pg_container
     image: postgres:15-alpine
-    restart: "on-failure"
+    restart: on-failure
     env_file:
       - ./.env.prod.db
     logging:
@@ -44,7 +44,7 @@ services:
   pgadmin:
     container_name: pgadmin4_container
     image: dpage/pgadmin4
-    restart: "on-failure"
+    restart: on-failure
     env_file:
       - ./.env.pgadmin
     volumes:
@@ -64,7 +64,7 @@ services:
       - 1337:80
     links:
       - web:web
-    restart: "on-failure"
+    restart: on-failure
     depends_on:
       - web
     networks:

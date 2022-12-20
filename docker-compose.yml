@@ -34,7 +34,7 @@ services:
         aliases:
           - db
     volumes:
-      - postgres:/var/lib/postgresql/data/
+      - postgres-dev:/var/lib/postgresql/data/
   pgadmin:
     container_name: pgadmin4_container
     image: dpage/pgadmin4
@@ -42,7 +42,7 @@ services:
     env_file:
       - ./.env.pgadmin
     volumes:
-      - pgadmin:/var/lib/pgadmin/data
+      - pgadmin-dev:/var/lib/pgadmin/data
     ports:
       - "${PGADMIN_PORT:-5050}:80"
     networks:
@@ -57,5 +57,5 @@ networks:
     driver: bridge
 
 volumes:
-  postgres:
-  pgadmin:
+  postgres-dev:
+  pgadmin-dev:
