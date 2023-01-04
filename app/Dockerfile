@@ -5,13 +5,7 @@ FROM python:3.11.1-alpine
 RUN addgroup -S app && adduser -S app -G app
 
 # create directory for the app user
-RUN mkdir -p /home/app
-
-# create the appropriate directories
-ENV HOME=/home/app
-ENV APP_HOME=/home/app/web
-RUN mkdir $APP_HOME
-WORKDIR $APP_HOME
+WORKDIR /usr/src/app
 
 # set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -26,25 +20,25 @@ RUN apk update \
 
 # create and activate virtual environment
 # using final folder name to avoid path issues with packages
-RUN python3 -m venv $HOME/venv
-ENV PATH="$HOME/venv/bin:$PATH"
+RUN python3 -m venv ./venv
+ENV PATH="/usr/src/app/venv/bin:$PATH"
 
 # install dependencies
 RUN pip3 install --upgrade pip
 COPY ./requirements.txt .
-RUN pip3 wheel --no-cache-dir --no-deps --wheel-dir $HOME/wheels -r requirements.txt
-RUN pip3 install --no-cache $HOME/wheels/*
+RUN pip3 wheel --no-cache-dir --no-deps --wheel-dir ./wheels -r requirements.txt
+RUN pip3 install --no-cache ./wheels/*
 
 # copy entrypoint.sh
 COPY ./entrypoint.sh .
-RUN sed -i 's/\r$//g' $APP_HOME/entrypoint.sh
-RUN chmod +x $APP_HOME/entrypoint.sh
+RUN sed -i 's/\r$//g' ./entrypoint.sh
+RUN chmod +x ./entrypoint.sh
 
 # copy project
-COPY . $APP_HOME
+COPY . .
 
 # activate virtual environment
-ENV VIRTUAL_ENV=$APP_HOME/venv
+ENV VIRTUAL_ENV=./venv
 
 # run entrypoint.sh
 ENTRYPOINT ["/usr/src/app/entrypoint.sh"]
