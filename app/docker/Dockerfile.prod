@@ -1,0 +1,83 @@
+###########
+# BUILDER #
+###########
+
+# using Python official base image
+FROM python:3.10-slim AS builder-image
+
+# set work directory
+WORKDIR /usr/src/app
+
+# Sets utf-8 encoding for Python et al
+ENV LANG=C.UTF-8
+
+# set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# lint
+RUN pip3 install --upgrade pip
+RUN pip3 install flake8==3.9.2
+COPY . .
+RUN flake8 --ignore=E501,F401 .
+
+# Ensures that the python and pip executables used
+# in the image will be those from our virtualenv.
+ENV VIRTUAL_ENV=/usr/src/app/venv
+# Setup the virtualenv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+# install dependencies (Compiler and OS libraries)
+RUN apt-get update \  
+    && apt-get install -y --no-install-recommends build-essential libpq-dev \  
+    && rm -rf /var/lib/apt/lists/*
+
+# copy requirements.txt
+COPY ./app/requirements.txt .
+
+RUN pip install --no-cache-dir -r requirements.txt 
+
+#########
+# FINAL #
+#########
+
+FROM python:3.10-slim AS runner-image
+
+# Python Environment Variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# create the app user
+RUN useradd -U app_user \  
+    && install -d -m 0755 -o app_user -g app_user /home/app/web/static
+
+# create directory for the app user
+RUN mkdir -p /home/app/web
+
+# create the appropriate directories
+ENV HOME=/home/app
+ENV APP_HOME=/home/app/web
+WORKDIR $APP_HOME
+
+# set virtualenv path
+ENV PATH="$APP_HOME/venv/bin:$PATH"
+
+# copy in virtual Python environment
+COPY --from=builder-image /usr/src/app/venv .
+COPY --from=builder-image /usr/src/app/requirements.txt .
+
+# copy project
+COPY . $APP_HOME
+
+# change to the app user
+USER app_user:app_user
+
+# chown all the files to the app user
+COPY --chown=app_user:app_user . .
+
+#  Docker Run Checks and Configurations
+ENTRYPOINT ["./app/docker/entrypoint.sh"]
+
+CMD [ "./app/docker/start.sh", "server" ]
