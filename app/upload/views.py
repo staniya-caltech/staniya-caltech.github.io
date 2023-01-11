@@ -56,12 +56,12 @@ def UploadView(request):
             uploaded_file_path = fs.path(filename)
             pipeline = "a"
         elif "mrozpipe" in rel_filepath.name:
-            fs = FileSystemStorage(location=os.path.join(base_dir, "mrozpipe"))
+            fs = FileSystemStorage(location=base_dir)
             filename = fs.save(rel_filepath.name, rel_filepath)
             uploaded_file_path = fs.path(filename)
             pipeline = "m"
         elif "ztffps" in rel_filepath.name:
-            fs = FileSystemStorage(location=os.path.join(base_dir, "ztffps"))
+            fs = FileSystemStorage(location=base_dir)
             filename = fs.save(rel_filepath.name, rel_filepath)
             uploaded_file_path = fs.path(filename)
             pipeline = "z"
@@ -79,6 +79,7 @@ def UploadView(request):
                 request, f"Process failed due to the following error: \n {e}"
             )
         os.remove(uploaded_file_path)
+        os.rmdir(base_dir)
         context = {}
         return render(request, template_name, context)
 
